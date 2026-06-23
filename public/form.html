@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>出席可能日時フォーム</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+  .container { max-width: 500px; margin: 0 auto; }
+  .header { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .header h1 { font-size: 18px; color: #1a1a2e; }
+  .header .name { font-size: 22px; font-weight: 700; color: #4f46e5; margin: 4px 0; }
+  .header .group-badge { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 6px; }
+  .group-link { display: block; margin-top: 10px; padding: 10px; background: #f0fdf4; border-radius: 8px; text-decoration: none; color: #166534; font-size: 13px; font-weight: 600; text-align: center; border: 1px solid #bbf7d0; }
+  .group-link:hover { background: #dcfce7; }
+  .day-section { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .day-title { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #f3f4f6; }
+  .slot { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+  .slot:last-child { border-bottom: none; }
+  .slot input[type=checkbox] { width: 20px; height: 20px; accent-color: #4f46e5; margin-right: 12px; cursor: pointer; flex-shrink: 0; }
+  .slot label { font-size: 15px; color: #374151; cursor: pointer; user-select: none; }
+  .slot.checked label { color: #4f46e5; font-weight: 600; }
+  .slot.checked { background: #fafafe; border-radius: 6px; }
+  .submit-wrap { position: sticky; bottom: 20px; margin-top: 16px; }
+  .btn-submit { display: block; width: 100%; padding: 16px; background: #4f46e5; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(79,70,229,0.4); transition: all 0.15s; }
+  .btn-submit:hover { background: #4338ca; transform: translateY(-1px); }
+  .btn-submit:disabled { background: #a5b4fc; box-shadow: none; transform: none; cursor: not-allowed; }
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #16a34a; color: white; padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .error-page { text-align: center; padding: 60px 20px; }
+  .error-page h2 { color: #dc2626; margin-bottom: 12px; }
+  .back-btn { display: inline-block; margin-top: 16px; color: #4f46e5; text-decoration: none; font-weight: 600; }
+  .select-all { font-size: 12px; color: #6b7280; cursor: pointer; margin-left: auto; }
+  .select-all:hover { color: #4f46e5; }
+  .count-badge { font-size: 12px; color: #6b7280; font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="loading" style="text-align:center;padding:60px 20px;color:#888;">読み込み中...</div>
+  <div id="errorPage" class="error-page" style="display:none">
+    <h2>リンクが無効です</h2>
+    <p>URLが正しくないか、有効期限が切れています。</p>
+    <a href="/" class="back-btn">トップに戻る</a>
+  </div>
+  <div id="mainContent" style="display:none">
+    <div class="header">
+      <div style="font-size:13px;color:#888;">打ち合わせ候補日時の入力</div>
+      <div class="name" id="displayName"></div>
+      <div id="groupBadge"></div>
+      <a id="groupViewLink" class="group-link" style="display:none" href="#">👥 グループ全員の回答を見る</a>
+    </div>
+    <div id="daysContainer"></div>
+    <div class="submit-wrap">
+      <button class="btn-submit" id="submitBtn" onclick="saveAvailability()">回答を送信する</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATES = [
+  { key: '7/1', label: '7月1日（水）' },
+  { key: '7/2', label: '7月2日（木）' },
+  { key: '7/3', label: '7月3日（金）' }
+];
+
+const TIMES = [];
+TIMES.push({ start: '12:30', end: '13:00' });
+for (let h = 15; h < 21; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    const eh = m === 30 ? h + 1 : h;
+    const em = m === 30 ? 0 : 30;
+    const e = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+    TIMES.push({ start: s, end: e });
+  }
+}
+
+const params = new URLSearchParams(location.search);
+const TOKEN = params.get('token');
+const GROUP_CODE = params.get('code');
+let currentSlots = {};
+
+async function init() {
+  if (!TOKEN) { showError(); return; }
+
+  const meRes = await fetch(`/api/me/${TOKEN}`);
+  if (!meRes.ok) { showError(); return; }
+  const me = await meRes.json();
+
+  document.getElementById('displayName').textContent = me.name;
+
+  if (me.type === 'group' && me.groupName) {
+    document.getElementById('groupBadge').innerHTML = `<span class="group-badge">グループ: ${me.groupName}（コード: ${me.groupCode}）</span>`;
+    const gLink = document.getElementById('groupViewLink');
+    gLink.style.display = 'block';
+    gLink.href = `/group.html?code=${me.groupCode}&token=${TOKEN}`;
+  }
+
+  const availRes = await fetch(`/api/availability/${TOKEN}`);
+  if (availRes.ok) {
+    const avail = await availRes.json();
+    currentSlots = avail.slots || {};
+  }
+
+  renderDays();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('mainContent').style.display = 'block';
+}
+
+function renderDays() {
+  const container = document.getElementById('daysContainer');
+  container.innerHTML = '';
+  DATES.forEach(date => {
+    const checked = TIMES.filter(t => currentSlots[`${date.key}_${t.start}`]).length;
+    const div = document.createElement('div');
+    div.className = 'day-section';
+    div.innerHTML = `
+      <div class="day-title">
+        ${date.label}
+        <span class="count-badge" id="count-${date.key}">（${checked}/${TIMES.length}）</span>
+        <span class="select-all" onclick="toggleAll('${date.key}')">全選択/解除</span>
+      </div>
+      ${TIMES.map(t => {
+        const key = `${date.key}_${t.start}`;
+        const isChecked = !!currentSlots[key];
+        return `
+          <div class="slot ${isChecked ? 'checked' : ''}" id="slot-${key.replace('/','_')}">
+            <input type="checkbox" id="cb-${key.replace('/','_')}" ${isChecked ? 'checked' : ''}
+              onchange="toggleSlot('${key}', this)">
+            <label for="cb-${key.replace('/','_')}">${t.start}〜${t.end}</label>
+          </div>`;
+      }).join('')}`;
+    container.appendChild(div);
+  });
+}
+
+function toggleSlot(key, cb) {
+  currentSlots[key] = cb.checked;
+  const safeKey = key.replace('/','_');
+  const slotEl = document.getElementById('slot-' + safeKey);
+  if (slotEl) slotEl.className = 'slot' + (cb.checked ? ' checked' : '');
+  updateCount(key.split('_')[0]);
+}
+
+function updateCount(dateKey) {
+  const count = TIMES.filter(t => currentSlots[`${dateKey}_${t.start}`]).length;
+  const el = document.getElementById('count-' + dateKey);
+  if (el) el.textContent = `（${count}/${TIMES.length}）`;
+}
+
+function toggleAll(dateKey) {
+  const allChecked = TIMES.every(t => currentSlots[`${dateKey}_${t.start}`]);
+  TIMES.forEach(t => {
+    const key = `${dateKey}_${t.start}`;
+    currentSlots[key] = !allChecked;
+    const safeKey = key.replace('/','_');
+    const cb = document.getElementById('cb-' + safeKey);
+    const slotEl = document.getElementById('slot-' + safeKey);
+    if (cb) cb.checked = !allChecked;
+    if (slotEl) slotEl.className = 'slot' + (!allChecked ? ' checked' : '');
+  });
+  updateCount(dateKey);
+}
+
+async function saveAvailability() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '送信中...';
+
+  const res = await fetch(`/api/availability/${TOKEN}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slots: currentSlots })
+  });
+
+  btn.disabled = false;
+  btn.textContent = '回答を送信する';
+
+  if (res.ok) {
+    showToast('✅ 回答を保存しました！');
+  } else {
+    showToast('❌ エラーが発生しました。もう一度お試しください。');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function showError() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('errorPage').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>

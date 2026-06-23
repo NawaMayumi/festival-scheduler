@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者ページ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+  .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  .login-box { background: white; border-radius: 16px; padding: 32px 28px; max-width: 360px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .login-box h1 { font-size: 20px; color: #1a1a2e; margin-bottom: 6px; }
+  .login-box p { font-size: 13px; color: #888; margin-bottom: 24px; }
+  input[type=password] { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.15s; margin-bottom: 10px; }
+  input[type=password]:focus { border-color: #4f46e5; }
+  .btn { width: 100%; padding: 13px; border-radius: 10px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-primary:hover { background: #4338ca; }
+  .error-msg { color: #dc2626; font-size: 13px; margin-top: 8px; display: none; }
+
+  /* Dashboard */
+  #dashboard { display: none; }
+  .topbar { background: #1a1a2e; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px; margin-bottom: 20px; }
+  .topbar h1 { color: white; font-size: 16px; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-sm { padding: 7px 14px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .btn-refresh { background: #374151; color: #d1d5db; }
+  .btn-refresh:hover { background: #4b5563; }
+  .btn-logout { background: #dc2626; color: white; }
+  .btn-logout:hover { background: #b91c1c; }
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat { background: white; border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 100px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .stat .num { font-size: 28px; font-weight: 700; color: #4f46e5; }
+  .stat .label { font-size: 12px; color: #888; margin-top: 2px; }
+  .card { background: white; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+  .card-header { padding: 16px 20px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+  .card-header h2 { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+  .type-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+  .solo-badge { background: #dbeafe; color: #1e40af; }
+  .group-badge { background: #ede9fe; color: #6d28d9; }
+  .code-badge { background: #f3f4f6; color: #374151; font-family: monospace; letter-spacing: 1px; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  .member-section { padding: 0 20px 16px; }
+  .member-name { font-size: 13px; font-weight: 700; color: #374151; padding: 12px 0 6px; border-bottom: 1px solid #f5f5f5; }
+  .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 6px; }
+  table { border-collapse: collapse; min-width: 500px; width: 100%; }
+  th { font-size: 10px; color: #9ca3af; font-weight: 600; padding: 5px 8px; text-align: center; background: #f9fafb; white-space: nowrap; }
+  th.time-col { text-align: left; min-width: 90px; }
+  td { padding: 5px 8px; text-align: center; border-bottom: 1px solid #f9f9f9; font-size: 12px; }
+  td.time-label { text-align: left; font-size: 12px; color: #6b7280; white-space: nowrap; }
+  .ok { color: #16a34a; font-weight: 700; }
+  .ng { color: #dc2626; }
+  .na { color: #d1d5db; }
+  .all-ok-bg { background: #f0fdf4 !important; }
+  .date-header { background: #eef2ff; color: #3730a3; font-size: 11px; font-weight: 700; padding: 6px 8px; text-align: left; border-bottom: 1px solid #e0e7ff; }
+  #loading { text-align: center; padding: 40px; color: #888; }
+  .no-data { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+  .updated-at { font-size: 10px; color: #aaa; font-weight: 400; margin-left: 6px; }
+  .summary-bar { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px 0; }
+  .avail-chip { background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-wrap" id="loginPage">
+  <div class="login-box">
+    <h1>🔐 管理者ログイン</h1>
+    <p>実行委員会専用ページです</p>
+    <input type="password" id="pwInput" placeholder="パスワード" onkeydown="if(event.key==='Enter')login()">
+    <button class="btn btn-primary" onclick="login()">ログイン</button>
+    <div class="error-msg" id="loginError"></div>
+    <div style="margin-top:16px;text-align:center"><a href="/" style="font-size:13px;color:#888">← トップに戻る</a></div>
+  </div>
+</div>
+
+<!-- ダッシュボード -->
+<div id="dashboard">
+  <div class="topbar">
+    <h1>📋 管理者ダッシュボード</h1>
+    <div class="topbar-actions">
+      <button class="btn-sm btn-refresh" onclick="loadAll()">🔄 更新</button>
+      <button class="btn-sm btn-logout" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">-</div><div class="label">出演者・グループ数</div></div>
+    <div class="stat"><div class="num" id="statMembers">-</div><div class="label">回答メンバー数</div></div>
+    <div class="stat"><div class="num" id="statResponded">-</div><div class="label">回答済み</div></div>
+  </div>
+
+  <div id="loading">読み込み中...</div>
+  <div id="performerList"></div>
+</div>
+
+<script>
+const DATES = [
+  { key: '7/1', label: '7月1日（水）' },
+  { key: '7/2', label: '7月2日（木）' },
+  { key: '7/3', label: '7月3日（金）' }
+];
+const TIMES = [];
+TIMES.push({ start: '12:30', end: '13:00' });
+for (let h = 15; h < 21; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    const eh = m === 30 ? h + 1 : h;
+    const em = m === 30 ? 0 : 30;
+    const e = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+    TIMES.push({ start: s, end: e });
+  }
+}
+
+async function login() {
+  const pw = document.getElementById('pwInput').value;
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+
+  const res = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: pw })
+  });
+
+  if (res.ok) {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    loadAll();
+  } else {
+    const d = await res.json();
+    err.textContent = d.error || 'ログインに失敗しました';
+    err.style.display = 'block';
+  }
+}
+
+async function logout() {
+  await fetch('/api/admin/logout', { method: 'POST' });
+  location.reload();
+}
+
+async function loadAll() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('performerList').innerHTML = '';
+
+  const res = await fetch('/api/admin/all');
+  if (!res.ok) {
+    document.getElementById('loading').textContent = 'データ取得に失敗しました';
+    return;
+  }
+  const data = await res.json();
+  document.getElementById('loading').style.display = 'none';
+
+  // Stats
+  const totalGroups = data.length;
+  const totalMembers = data.reduce((s, g) => s + g.members.length, 0);
+  const responded = data.reduce((s, g) => s + g.members.filter(m => Object.keys(m.slots).length > 0).length, 0);
+  document.getElementById('statTotal').textContent = totalGroups;
+  document.getElementById('statMembers').textContent = totalMembers;
+  document.getElementById('statResponded').textContent = responded;
+
+  if (data.length === 0) {
+    document.getElementById('performerList').innerHTML = '<div class="no-data">まだ登録された出演者がいません</div>';
+    return;
+  }
+
+  const list = document.getElementById('performerList');
+  data.forEach(group => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const badgeClass = group.type === 'solo' ? 'solo-badge' : 'group-badge';
+    const badgeText = group.type === 'solo' ? 'ソロ' : 'グループ';
+    const codeHtml = group.code ? `<span class="code-badge">${group.code}</span>` : '';
+
+    let membersHtml = '';
+    group.members.forEach(m => {
+      const hasData = Object.keys(m.slots).length > 0;
+      const updated = m.updatedAt ? `<span class="updated-at">更新: ${new Date(m.updatedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>` : '';
+
+      // Available slots summary
+      const availSlots = Object.entries(m.slots).filter(([,v]) => v).map(([k]) => {
+        const [date, time] = k.split('_');
+        return `${date} ${time}`;
+      });
+      const summaryHtml = hasData
+        ? `<div class="summary-bar">${availSlots.slice(0,8).map(s => `<span class="avail-chip">${s}</span>`).join('')}${availSlots.length > 8 ? `<span class="avail-chip">+${availSlots.length-8}</span>` : ''}</div>`
+        : '<div style="padding:4px 0;font-size:12px;color:#aaa">未回答</div>';
+
+      // Build grid per date
+      const dateGrids = DATES.map(date => {
+        const cols = TIMES.map(t => {
+          const key = `${date.key}_${t.start}`;
+          if (!hasData) return `<td><span class="na">—</span></td>`;
+          return m.slots[key] ? `<td class="ok">○</td>` : `<td class="ng">✗</td>`;
+        }).join('');
+        return `<tr><td colspan="${TIMES.length + 1}" class="date-header">${date.label}</td></tr>
+          ${TIMES.map(t => {
+            const key = `${date.key}_${t.start}`;
+            const cellClass = !hasData ? 'na' : (m.slots[key] ? 'ok' : 'ng');
+            const cellText = !hasData ? '—' : (m.slots[key] ? '○' : '✗');
+            return `<tr><td class="time-label">${t.start}〜${t.end}</td><td class="${cellClass}">${cellText}</td></tr>`;
+          }).join('')}`;
+      }).join('');
+
+      membersHtml += `
+        <div class="member-section">
+          <div class="member-name">${group.type === 'group' ? `👤 ${m.name}` : ''}${updated}</div>
+          ${summaryHtml}
+          ${hasData ? `<div class="grid-wrap"><table><thead><tr><th class="time-col">時間帯</th><th>可否</th></tr></thead><tbody>${dateGrids}</tbody></table></div>` : ''}
+        </div>`;
+    });
+
+    card.innerHTML = `
+      <div class="card-header">
+        <h2>${group.name}</h2>
+        <span class="type-badge ${badgeClass}">${badgeText}</span>
+        ${codeHtml}
+      </div>
+      ${membersHtml}`;
+    list.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>

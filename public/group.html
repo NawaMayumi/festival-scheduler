@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>グループの回答確認</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+  .container { max-width: 700px; margin: 0 auto; }
+  .header { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .header h1 { font-size: 20px; font-weight: 700; color: #1a1a2e; }
+  .header .sub { font-size: 13px; color: #888; margin-top: 4px; }
+  .back-link { display: inline-block; margin-top: 12px; color: #4f46e5; font-size: 13px; font-weight: 600; text-decoration: none; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
+  .legend-dot { width: 16px; height: 16px; border-radius: 4px; }
+  .card { background: white; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
+  .card-title { padding: 16px 20px; font-size: 16px; font-weight: 700; color: #1a1a2e; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
+  .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; min-width: 420px; }
+  th { padding: 8px 10px; font-size: 11px; color: #6b7280; font-weight: 600; text-align: center; background: #f9fafb; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+  th.time-col { text-align: left; min-width: 90px; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f9f9f9; text-align: center; vertical-align: middle; }
+  td.time-label { text-align: left; font-size: 13px; color: #4b5563; white-space: nowrap; }
+  .cell-ok { background: #dcfce7; border-radius: 4px; color: #15803d; font-weight: 700; font-size: 13px; }
+  .cell-ng { background: #fee2e2; border-radius: 4px; color: #b91c1c; font-size: 12px; }
+  .cell-na { background: #f3f4f6; border-radius: 4px; color: #9ca3af; font-size: 11px; }
+  .all-ok { background: #bbf7d0 !important; }
+  .date-group { background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 700; text-align: left; padding: 8px 10px; }
+  .refresh-btn { float: right; background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #6b7280; cursor: pointer; }
+  .refresh-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  #loading { text-align: center; padding: 60px 20px; color: #888; }
+  .member-tag { display: inline-block; background: #e0e7ff; color: #3730a3; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
+  .no-response { color: #d1d5db; font-size: 11px; }
+  .summary-row td { font-weight: 700; background: #fefce8; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="loading">読み込み中...</div>
+  <div id="content" style="display:none">
+    <div class="header">
+      <h1 id="groupTitle"></h1>
+      <div class="sub" id="memberCount"></div>
+      <button class="refresh-btn" onclick="loadData()">🔄 更新</button>
+      <a id="myFormLink" class="back-link" href="#">← 自分の回答フォームに戻る</a>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac"></div>○ 参加可</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div>✗ 不可</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f3f4f6;border:1px solid #e5e7eb"></div>未回答</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#bbf7d0;border:1px solid #4ade80"></div>全員○</div>
+      </div>
+    </div>
+    <div id="tableContainer"></div>
+  </div>
+</div>
+
+<script>
+const DATES = [
+  { key: '7/1', label: '7月1日（水）' },
+  { key: '7/2', label: '7月2日（木）' },
+  { key: '7/3', label: '7月3日（金）' }
+];
+const TIMES = [];
+TIMES.push({ start: '12:30', end: '13:00' });
+for (let h = 15; h < 21; h++) {
+  for (let m = 0; m < 60; m += 30) {
+    const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    const eh = m === 30 ? h + 1 : h;
+    const em = m === 30 ? 0 : 30;
+    const e = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
+    TIMES.push({ start: s, end: e });
+  }
+}
+
+const params = new URLSearchParams(location.search);
+const CODE = params.get('code');
+const TOKEN = params.get('token');
+
+async function loadData() {
+  if (!CODE) { document.getElementById('loading').textContent = 'コードが指定されていません'; return; }
+
+  const [groupRes, availRes] = await Promise.all([
+    fetch(`/api/group/${CODE}`),
+    fetch(`/api/group/${CODE}/availability`)
+  ]);
+
+  if (!groupRes.ok) { document.getElementById('loading').textContent = 'グループが見つかりません'; return; }
+
+  const group = await groupRes.json();
+  const members = await availRes.json();
+
+  document.getElementById('groupTitle').textContent = `🎵 ${group.name}`;
+  document.getElementById('memberCount').textContent = `メンバー ${members.length}人 • コード: ${CODE}`;
+  if (TOKEN) document.getElementById('myFormLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
+
+  renderTable(members);
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+}
+
+function renderTable(members) {
+  const container = document.getElementById('tableContainer');
+  container.innerHTML = '';
+
+  DATES.forEach(date => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const memberHeaders = members.map(m => {
+      const hasData = Object.keys(m.slots).length > 0;
+      return `<th>${m.name}${hasData ? '' : '<span class="no-response">（未回答）</span>'}</th>`;
+    }).join('');
+
+    const rows = TIMES.map(t => {
+      const key = `${date.key}_${t.start}`;
+      const cells = members.map(m => {
+        if (Object.keys(m.slots).length === 0) {
+          return `<td><span class="cell-na">未</span></td>`;
+        }
+        const val = m.slots[key];
+        if (val === true) return `<td><span class="cell-ok">○</span></td>`;
+        return `<td><span class="cell-ng">✗</span></td>`;
+      });
+
+      // Check if all members who answered said OK
+      const answered = members.filter(m => Object.keys(m.slots).length > 0);
+      const allOk = answered.length > 0 && answered.every(m => m.slots[key] === true);
+
+      return `<tr${allOk ? ' class="all-ok-row"' : ''}>
+        <td class="time-label">${t.start}〜${t.end}</td>
+        ${cells.join('')}
+      </tr>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="card-title">${date.label}</div>
+      <div class="grid-wrap">
+        <table>
+          <thead><tr>
+            <th class="time-col">時間帯</th>
+            ${memberHeaders}
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+// Apply all-ok highlight
+function applyHighlights() {
+  document.querySelectorAll('.all-ok-row').forEach(row => {
+    row.querySelectorAll('td').forEach(td => td.style.background = '#f0fdf4');
+  });
+}
+
+loadData().then(applyHighlights);
+</script>
+</body>
+</html>

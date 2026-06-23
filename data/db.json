@@ -1,0 +1,45 @@
+{
+  "groups": [
+    {
+      "id": "4c35457a-e017-4ddd-b60c-0113de466355",
+      "type": "solo",
+      "name": "山田太郎",
+      "code": null,
+      "members": [
+        {
+          "id": "679f5aa2-8730-47bb-837f-e2af3f0de30b",
+          "name": "山田太郎",
+          "token": "7f938aa10215474a88d2973d2804be78"
+        }
+      ]
+    },
+    {
+      "id": "d2666c02-4130-4ef8-80f4-b888259035c8",
+      "type": "group",
+      "name": "ロックバンドA",
+      "code": "KABU7",
+      "members": [
+        {
+          "id": "c1feb015-d98a-4de5-b0a6-197419074476",
+          "name": "田中花子",
+          "token": "9b19398544ec422c96d9c245f4705147"
+        },
+        {
+          "id": "141abc6a-490c-4578-93d1-bec6a60d2197",
+          "name": "鈴木次郎",
+          "token": "fcc4e02860024fa989ed8c4fa218bd81"
+        }
+      ]
+    }
+  ],
+  "availability": {
+    "7f938aa10215474a88d2973d2804be78": {
+      "slots": {
+        "7/1_12:30": true,
+        "7/1_15:00": false,
+        "7/2_12:30": true
+      },
+      "updatedAt": "2026-06-23T09:53:07.017Z"
+    }
+  }
+}
