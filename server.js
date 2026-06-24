@@ -94,6 +94,15 @@ app.post('/api/register/group', (req, res) => {
   res.json({ token, groupCode: code, groupName: groupName.trim() });
 });
 
+// グループ一覧取得（参加画面用）
+app.get('/api/groups', (req, res) => {
+  const db = readDB();
+  const groups = db.groups
+    .filter(g => g.type === 'group')
+    .map(g => ({ code: g.code, name: g.name, memberCount: g.members.length }));
+  res.json(groups);
+});
+
 // グループ情報取得（公開）
 app.get('/api/group/:code', (req, res) => {
   const db = readDB();

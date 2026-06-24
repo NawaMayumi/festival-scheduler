@@ -116,6 +116,21 @@
   .join-link { display: block; text-align: center; font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 10px; text-decoration: underline; text-underline-offset: 2px; }
   .join-link:hover { color: var(--text); }
 
+  /* グループ一覧 */
+  .group-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; max-height: 240px; overflow-y: auto; }
+  .group-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    background: var(--surface);
+  }
+  .group-item:hover { border-color: var(--text); }
+  .group-item.selected { border-color: var(--text); background: #fafafa; }
+  .group-item-name { font-size: 14px; font-weight: 600; }
+  .group-item-count { font-size: 12px; color: var(--muted); }
+  .no-groups { text-align: center; padding: 20px; font-size: 13px; color: var(--muted); border: 1.5px dashed var(--border); border-radius: 8px; }
+  .loading-groups { text-align: center; padding: 16px; font-size: 13px; color: var(--muted); }
+
   .admin-link {
     display: block;
     text-align: center;
@@ -175,14 +190,16 @@
   <!-- グループ参加 -->
   <div class="panel" id="panel-join">
     <div class="field">
-      <label>グループコード</label>
-      <input id="joinCode" type="text" placeholder="代表者から受け取ったコード" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-weight:600">
+      <label>参加するグループを選択</label>
+      <div id="groupList" class="group-list">
+        <div class="loading-groups">読み込み中…</div>
+      </div>
     </div>
-    <div class="field">
+    <div class="field" id="joinNameField" style="display:none">
       <label>あなたの名前</label>
       <input id="joinName" type="text" placeholder="例：鈴木次郎" maxlength="30">
     </div>
-    <button class="btn" onclick="joinGroup()">参加してフォームへ</button>
+    <button class="btn" id="joinBtn" onclick="joinGroup()" style="display:none">参加してフォームへ</button>
     <div class="err" id="joinErr"></div>
     <span class="join-link" onclick="switchSub('create')">← グループを新しく作る</span>
   </div>
@@ -200,9 +217,44 @@ function selectType(type) {
   document.getElementById(type === 'solo' ? 'panel-solo' : 'panel-create').classList.add('show');
 }
 
+let selectedGroupCode = null;
+
 function switchSub(sub) {
   ['create','join'].forEach(p => document.getElementById('panel-' + p).classList.remove('show'));
   document.getElementById('panel-' + sub).classList.add('show');
+  if (sub === 'join') loadGroupList();
+}
+
+async function loadGroupList() {
+  const container = document.getElementById('groupList');
+  container.innerHTML = '<div class="loading-groups">読み込み中…</div>';
+  selectedGroupCode = null;
+  document.getElementById('joinNameField').style.display = 'none';
+  document.getElementById('joinBtn').style.display = 'none';
+
+  const res = await fetch('/api/groups');
+  const groups = await res.json();
+
+  if (!groups.length) {
+    container.innerHTML = '<div class="no-groups">まだグループが登録されていません。<br>先に代表者がグループを作成してください。</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  groups.forEach(g => {
+    const item = document.createElement('div');
+    item.className = 'group-item';
+    item.innerHTML = `<span class="group-item-name">${g.name}</span><span class="group-item-count">${g.memberCount}人参加中</span>`;
+    item.onclick = () => {
+      document.querySelectorAll('.group-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+      selectedGroupCode = g.code;
+      document.getElementById('joinNameField').style.display = 'block';
+      document.getElementById('joinBtn').style.display = 'block';
+      document.getElementById('joinName').focus();
+    };
+    container.appendChild(item);
+  });
 }
 
 function showErr(id, msg) {
@@ -233,11 +285,11 @@ async function createGroup() {
 }
 
 async function joinGroup() {
-  const code = document.getElementById('joinCode').value.trim().toUpperCase();
   const name = document.getElementById('joinName').value.trim();
-  if (!code || !name) { showErr('joinErr', 'コードと名前を入力してください'); return; }
+  if (!selectedGroupCode) { showErr('joinErr', 'グループを選択してください'); return; }
+  if (!name) { showErr('joinErr', '名前を入力してください'); return; }
   document.getElementById('joinErr').style.display = 'none';
-  const res = await fetch(`/api/join/${code}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+  const res = await fetch(`/api/join/${selectedGroupCode}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
   const d = await res.json();
   if (!res.ok) { showErr('joinErr', d.error); return; }
   location.href = `/form.html?token=${d.token}&code=${d.groupCode}`;
