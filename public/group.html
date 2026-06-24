@@ -3,97 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>グループの回答一覧</title>
+<title>グループ回答</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f7f7f8;
-    --surface: #ffffff;
-    --border: #e4e4e7;
-    --text: #18181b;
-    --muted: #71717a;
+    --bg: #f7f7f8; --surface: #ffffff;
+    --border: #e4e4e7; --text: #18181b; --muted: #71717a;
     --yes: #16a34a; --yes-bg: #dcfce7;
     --maybe: #d97706; --maybe-bg: #fef3c7;
     --no: #dc2626; --no-bg: #fee2e2;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter','Noto Sans JP',sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+  body { font-family: 'Inter','Noto Sans JP',sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); user-select: none; -webkit-user-select: none; }
 
-  .topbar {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    position: sticky; top: 0; z-index: 10;
-  }
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 10; }
   .topbar-left h1 { font-size: 15px; font-weight: 700; }
   .topbar-left .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .topbar-right { display: flex; align-items: center; gap: 8px; }
-  .btn-outline {
-    font-size: 12px; font-weight: 500; color: var(--muted);
-    border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px;
-    background: var(--surface); cursor: pointer; font-family: inherit;
-    text-decoration: none; transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
-  }
+  .btn-outline { font-size: 12px; font-weight: 500; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; background: var(--surface); cursor: pointer; font-family: inherit; text-decoration: none; transition: color .15s, border-color .15s; white-space: nowrap; }
   .btn-outline:hover { color: var(--text); border-color: #a1a1aa; }
 
-  .legend {
-    background: var(--surface); border-bottom: 1px solid var(--border);
-    padding: 9px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-  }
+  .legend { padding: 9px 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
   .ldot { width: 20px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
-  .l-yes   { background: var(--yes-bg); color: var(--yes); }
+  .l-yes { background: var(--yes-bg); color: var(--yes); }
   .l-maybe { background: var(--maybe-bg); color: var(--maybe); }
-  .l-no    { background: var(--no-bg); color: var(--no); }
-  .l-na    { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 9px; }
-  .allok-note { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .l-no { background: var(--no-bg); color: var(--no); }
+  .l-na { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 9px; }
+  .legend-hint { margin-left: auto; font-size: 11px; color: #a1a1aa; }
 
-  .content { padding: 16px; max-width: 720px; margin: 0 auto; }
+  .content { padding: 16px; max-width: 760px; margin: 0 auto; }
 
-  .day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
-  .day-title {
-    padding: 12px 16px; border-bottom: 1px solid var(--border);
-    font-size: 13px; font-weight: 600; color: var(--muted);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .day-title strong { font-size: 15px; color: var(--text); }
+  /* ---- 自分の回答エリア ---- */
+  .my-section { margin-bottom: 20px; }
+  .section-heading { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .section-heading::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .cal-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cal { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cal thead th { padding: 0; text-align: center; }
+  .cal thead th.corner { width: 58px; min-width: 58px; }
+  .day-col { background: var(--surface); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 4px 6px; margin: 0 3px; display: block; }
+  .day-month { font-size: 10px; color: var(--muted); font-weight: 500; }
+  .day-num { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; margin: 1px 0; }
+  .day-dow { font-size: 10px; font-weight: 600; }
+  .wed { color: #2563eb; } .thu { color: #7c3aed; } .fri { color: #dc2626; }
+  .cal tbody td { padding: 2px 3px; }
+  .cal tbody td.tc { padding: 2px 4px 2px 0; text-align: right; vertical-align: middle; }
+  .tlabel { font-size: 10px; color: #a1a1aa; white-space: nowrap; }
+  .sec-row td { padding: 10px 3px 3px; }
+  .sec-label { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .sec-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .sec-dot-day { background: #f59e0b; } .sec-dot-night { background: #6366f1; }
+
+  .cell { width: 100%; height: 40px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; transition: border-color .1s, background .1s; touch-action: none; }
+  .cell:hover { border-color: #a1a1aa; }
+  .s-yes   { background: var(--yes-bg);   border-color: #86efac; color: var(--yes); }
+  .s-maybe { background: var(--maybe-bg); border-color: #fcd34d; color: var(--maybe); }
+  .s-no    { background: var(--no-bg);    border-color: #fca5a5; color: var(--no); }
+
+  .save-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .counts { display: flex; gap: 10px; }
+  .cnt { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 3px; }
+  .cnt-yes { color: var(--yes); } .cnt-maybe { color: var(--maybe); } .cnt-no { color: var(--no); }
+  .cdot { width: 7px; height: 7px; border-radius: 50%; }
+  .cdot-yes { background: var(--yes); } .cdot-maybe { background: var(--maybe); } .cdot-no { background: var(--no); }
+  .save-btn { margin-left: auto; padding: 9px 20px; background: var(--text); color: white; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  .save-btn:hover { opacity: 0.8; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; z-index: 100; }
+  .toast.show { opacity: 1; }
+
+  /* ---- メンバー比較テーブル ---- */
+  .compare-section { margin-top: 4px; }
+  .day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .day-title { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .day-title strong { font-size: 14px; color: var(--text); }
   .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th {
-    padding: 8px 10px; font-size: 11px; font-weight: 600; color: var(--muted);
-    border-bottom: 1px solid var(--border); background: var(--bg);
-    text-align: center; white-space: nowrap;
-  }
-  thead th.tc { text-align: left; min-width: 90px; }
-  tbody td { padding: 5px 8px; border-bottom: 1px solid var(--bg); text-align: center; }
-  tbody td:last-child { border-right: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { padding: 7px 8px; font-size: 11px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); text-align: center; white-space: nowrap; }
+  thead th.hc { text-align: left; min-width: 82px; }
+  tbody td { padding: 4px 6px; border-bottom: 1px solid var(--bg); text-align: center; }
   tbody tr:last-child td { border-bottom: none; }
-  td.tl { text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; padding-left: 16px; }
-  .chip {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 32px; height: 26px; border-radius: 5px;
-    font-size: 13px; font-weight: 700;
-  }
-  .c-yes   { background: var(--yes-bg); color: var(--yes); }
+  td.tl { text-align: left; font-size: 11px; color: var(--muted); white-space: nowrap; padding-left: 16px; }
+  .chip { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 24px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  .c-yes   { background: var(--yes-bg);   color: var(--yes); }
   .c-maybe { background: var(--maybe-bg); color: var(--maybe); }
-  .c-no    { background: var(--no-bg); color: var(--no); }
-  .c-na    { background: var(--bg); color: #d4d4d8; font-size: 11px; }
+  .c-no    { background: var(--no-bg);    color: var(--no); }
+  .c-na    { background: var(--bg);       color: #d4d4d8; font-size: 10px; }
   .row-allok td { background: #f0fdf4; }
   .no-ans { display: block; font-size: 10px; color: #d4d4d8; margin-top: 1px; }
+  .me-col { background: #fafafa; }
 
   #loading { text-align: center; padding: 80px 20px; font-size: 14px; color: var(--muted); }
-  #errMsg  { text-align: center; padding: 80px 20px; font-size: 14px; color: var(--no); }
 </style>
 </head>
 <body>
+
 <div class="topbar">
   <div class="topbar-left">
-    <h1 id="groupTitle">グループの回答一覧</h1>
+    <h1 id="groupTitle"></h1>
     <div class="sub" id="memberSub"></div>
   </div>
-  <div class="topbar-right">
-    <button class="btn-outline" onclick="loadData()">更新</button>
+  <div style="display:flex;gap:8px">
+    <button class="btn-outline" onclick="init()">更新</button>
     <a id="backLink" href="/" class="btn-outline">← 自分のフォームへ</a>
   </div>
 </div>
@@ -103,25 +117,60 @@
   <div class="legend-item"><div class="ldot l-maybe">△</div>たぶん大丈夫</div>
   <div class="legend-item"><div class="ldot l-no">✗</div>参加できない</div>
   <div class="legend-item"><div class="ldot l-na">—</div>未回答</div>
-  <span class="allok-note">行が緑になっている時間帯は全員○</span>
+  <span class="legend-hint">自分の行はそのまま編集できます</span>
 </div>
 
 <div id="loading">読み込み中</div>
-<div id="errMsg" style="display:none">グループが見つかりませんでした</div>
-<div class="content" id="content" style="display:none"></div>
+
+<div class="content" id="content" style="display:none">
+  <!-- 自分の回答 -->
+  <div class="my-section" id="mySection" style="display:none">
+    <div class="section-heading">あなたの回答（<span id="myName"></span>）</div>
+    <div class="cal-wrap">
+      <table class="cal">
+        <thead>
+          <tr>
+            <th class="corner"></th>
+            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">1</div><div class="day-dow wed">水</div></div></th>
+            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">2</div><div class="day-dow thu">木</div></div></th>
+            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">3</div><div class="day-dow fri">金</div></div></th>
+          </tr>
+        </thead>
+        <tbody id="myCalBody"></tbody>
+      </table>
+    </div>
+    <div class="save-row">
+      <div class="counts">
+        <div class="cnt cnt-yes"><div class="cdot cdot-yes"></div>○ <span id="cntYes">0</span></div>
+        <div class="cnt cnt-maybe"><div class="cdot cdot-maybe"></div>△ <span id="cntMaybe">0</span></div>
+        <div class="cnt cnt-no"><div class="cdot cdot-no"></div>✗ <span id="cntNo">0</span></div>
+      </div>
+      <button class="save-btn" id="saveBtn" onclick="save()">保存する</button>
+    </div>
+  </div>
+
+  <!-- メンバー比較 -->
+  <div class="compare-section">
+    <div class="section-heading">メンバー全員の回答</div>
+    <div id="compareContainer"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-const DATES = [
-  { key:'7/1', label:'7月1日', dow:'水' },
-  { key:'7/2', label:'7月2日', dow:'木' },
-  { key:'7/3', label:'7月3日', dow:'金' },
+const DATES = ['7/1','7/2','7/3'];
+const DATE_LABELS = [
+  { key:'7/1', label:'7月1日', dow:'水曜日' },
+  { key:'7/2', label:'7月2日', dow:'木曜日' },
+  { key:'7/3', label:'7月3日', dow:'金曜日' },
 ];
 const TIMES = [];
 TIMES.push({ start:'12:30', end:'13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m===30 ? h+1 : h, em = m===30 ? 0 : 30;
+    const eh = m===30?h+1:h, em = m===30?0:30;
     TIMES.push({ start:s, end:`${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
@@ -130,80 +179,189 @@ const params = new URLSearchParams(location.search);
 const CODE  = params.get('code');
 const TOKEN = params.get('token');
 
+const NEXT   = { empty:'yes', yes:'maybe', maybe:'no', no:'empty' };
+const LABELS = { yes:'○', maybe:'△', no:'✗', empty:'' };
+const CLS    = { yes:'s-yes', maybe:'s-maybe', no:'s-no', empty:'' };
+
+let mySlots = {};
+let dragging = false, dragState = null;
+
 function norm(v) {
-  if (v === true  || v === 'yes')   return 'yes';
-  if (v === 'maybe')                return 'maybe';
-  if (v === false || v === 'no')    return 'no';
+  if (v===true  || v==='yes')   return 'yes';
+  if (v==='maybe')              return 'maybe';
+  if (v===false || v==='no')    return 'no';
   return null;
 }
 
-async function loadData() {
-  if (!CODE) { showErr(); return; }
-  const [gRes, aRes] = await Promise.all([
-    fetch(`/api/group/${CODE}`),
-    fetch(`/api/group/${CODE}/availability`)
-  ]);
-  if (!gRes.ok) { showErr(); return; }
-  const group   = await gRes.json();
-  const members = await aRes.json();
+function getState(key) { return mySlots[key] || 'empty'; }
 
-  document.getElementById('groupTitle').textContent = group.name;
-  document.getElementById('memberSub').textContent  = `${members.length}人 · コード: ${CODE}`;
-  if (TOKEN) document.getElementById('backLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
-
-  render(members);
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('content').style.display = 'block';
+function applyCell(el, key, state) {
+  mySlots[key] = state;
+  el.className = `cell ${CLS[state]}`;
+  el.textContent = LABELS[state];
+  updateCounts();
 }
 
-function render(members) {
-  const content = document.getElementById('content');
-  content.innerHTML = '';
+function updateCounts() {
+  const v = Object.values(mySlots);
+  document.getElementById('cntYes').textContent   = v.filter(x=>x==='yes').length;
+  document.getElementById('cntMaybe').textContent = v.filter(x=>x==='maybe').length;
+  document.getElementById('cntNo').textContent    = v.filter(x=>x==='no').length;
+}
 
-  DATES.forEach(date => {
+function startDrag(el, key) { dragging=true; dragState=NEXT[getState(key)]; applyCell(el,key,dragState); }
+function enterCell(el, key) { if(dragging) applyCell(el,key,dragState); }
+function endDrag() { dragging=false; dragState=null; }
+
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  e.preventDefault();
+  const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('.cell[data-key]');
+  if (el) enterCell(el, el.dataset.key);
+}, { passive:false });
+document.addEventListener('touchend', endDrag);
+document.addEventListener('mouseup', endDrag);
+
+function buildMyGrid(savedSlots) {
+  mySlots = {};
+  Object.entries(savedSlots).forEach(([k,v]) => {
+    const n = norm(v);
+    if (n) mySlots[k] = n;
+  });
+
+  const tbody = document.getElementById('myCalBody');
+  tbody.innerHTML = '';
+
+  const makeHdr = (emoji, label, dotClass) => {
+    const tr = document.createElement('tr');
+    tr.className = 'sec-row';
+    tr.innerHTML = `<td colspan="4"><div class="sec-label"><span class="sec-dot ${dotClass}"></span>${emoji} ${label}</div></td>`;
+    return tr;
+  };
+
+  tbody.appendChild(makeHdr('☀️','昼','sec-dot-day'));
+  TIMES.forEach((time, i) => {
+    if (i===1) tbody.appendChild(makeHdr('🌙','夜','sec-dot-night'));
+    const tr = document.createElement('tr');
+    const tdT = document.createElement('td');
+    tdT.className = 'tc';
+    tdT.innerHTML = `<span class="tlabel">${time.start}</span>`;
+    tr.appendChild(tdT);
+    DATES.forEach(date => {
+      const key = `${date}_${time.start}`;
+      const state = getState(key);
+      const td = document.createElement('td');
+      const cell = document.createElement('div');
+      cell.className = `cell ${CLS[state]}`;
+      cell.textContent = LABELS[state];
+      cell.dataset.key = key;
+      cell.addEventListener('mousedown', e => { e.preventDefault(); startDrag(cell,key); });
+      cell.addEventListener('mouseenter', () => enterCell(cell,key));
+      cell.addEventListener('touchstart', e => { e.preventDefault(); startDrag(cell,key); }, {passive:false});
+      td.appendChild(cell);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  updateCounts();
+}
+
+async function save() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '保存中…';
+  const res = await fetch(`/api/availability/${TOKEN}`, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slots:mySlots})
+  });
+  btn.disabled = false; btn.textContent = '保存する';
+  showToast(res.ok ? '保存しました' : 'エラーが発生しました');
+  if (res.ok) buildCompare(await (await fetch(`/api/group/${CODE}/availability`)).json(), myName);
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+let myName = null;
+
+function buildCompare(members, currentName) {
+  const container = document.getElementById('compareContainer');
+  container.innerHTML = '';
+
+  DATE_LABELS.forEach(date => {
     const card = document.createElement('div');
     card.className = 'day-card';
 
-    const memberCols = members.map(m => {
-      const hasData = Object.keys(m.slots).length > 0;
-      return `<th>${m.name}${hasData ? '' : '<span class="no-ans">未回答</span>'}</th>`;
-    }).join('');
+    const memberCols = members.map(m =>
+      `<th${m.name===currentName?' class="me-col"':''}>${m.name}${Object.keys(m.slots).length===0?'<span class="no-ans">未回答</span>':''}</th>`
+    ).join('');
 
     const rows = TIMES.map(t => {
       const key = `${date.key}_${t.start}`;
       const answered = members.filter(m => Object.keys(m.slots).length > 0);
-      const allYes = answered.length > 0 && answered.every(m => norm(m.slots[key]) === 'yes');
+      const allYes = answered.length > 0 && answered.every(m => norm(m.slots[key])==='yes');
 
       const cells = members.map(m => {
         const hasData = Object.keys(m.slots).length > 0;
-        if (!hasData) return `<td><span class="chip c-na">—</span></td>`;
+        const isMe = m.name === currentName;
+        if (!hasData) return `<td${isMe?' class="me-col"':''}><span class="chip c-na">—</span></td>`;
         const state = norm(m.slots[key]);
-        if (!state || state === 'no') return `<td><span class="chip c-no">✗</span></td>`;
-        if (state === 'maybe')        return `<td><span class="chip c-maybe">△</span></td>`;
-        return `<td><span class="chip c-yes">○</span></td>`;
+        const cls = state==='yes'?'c-yes':state==='maybe'?'c-maybe':'c-no';
+        const lbl = state==='yes'?'○':state==='maybe'?'△':'✗';
+        return `<td${isMe?' class="me-col"':''}><span class="chip ${cls}">${lbl}</span></td>`;
       }).join('');
 
-      return `<tr${allYes ? ' class="row-allok"' : ''}><td class="tl">${t.start}〜${t.end}</td>${cells}</tr>`;
+      return `<tr${allYes?' class="row-allok"':''}><td class="tl">${t.start}〜${t.end}</td>${cells}</tr>`;
     }).join('');
 
     card.innerHTML = `
-      <div class="day-title"><strong>${date.label}</strong>${date.dow}曜日</div>
+      <div class="day-title"><strong>${date.label}</strong>${date.dow}</div>
       <div class="grid-wrap">
         <table>
-          <thead><tr><th class="tc">時間帯</th>${memberCols}</tr></thead>
+          <thead><tr><th class="hc">時間帯</th>${memberCols}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
-    content.appendChild(card);
+    container.appendChild(card);
   });
 }
 
-function showErr() {
+async function init() {
+  if (!CODE) { document.getElementById('loading').textContent = 'コードが指定されていません'; return; }
+
+  const requests = [
+    fetch(`/api/group/${CODE}`),
+    fetch(`/api/group/${CODE}/availability`),
+  ];
+  if (TOKEN) requests.push(fetch(`/api/me/${TOKEN}`), fetch(`/api/availability/${TOKEN}`));
+
+  const results = await Promise.all(requests);
+  if (!results[0].ok) { document.getElementById('loading').textContent = 'グループが見つかりません'; return; }
+
+  const group   = await results[0].json();
+  const members = await results[1].json();
+
+  document.getElementById('groupTitle').textContent = group.name;
+  document.getElementById('memberSub').textContent = `${members.length}人`;
+
+  if (TOKEN) {
+    const me = await results[2].json();
+    const avail = await results[3].json();
+    myName = me.name;
+    document.getElementById('backLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
+    document.getElementById('myName').textContent = me.name;
+    document.getElementById('mySection').style.display = 'block';
+    buildMyGrid(avail.slots || {});
+  }
+
+  buildCompare(members, myName);
   document.getElementById('loading').style.display = 'none';
-  document.getElementById('errMsg').style.display  = 'block';
+  document.getElementById('content').style.display = 'block';
 }
 
-loadData();
+init();
 </script>
 </body>
 </html>

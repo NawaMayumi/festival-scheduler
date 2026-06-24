@@ -66,27 +66,25 @@
   }
   .gcal-btn:hover { color: var(--text); border-color: #a1a1aa; }
 
-  /* グループコードバー */
-  .code-bar {
+  /* グループバー */
+  .group-bar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 10px 20px;
+    padding: 9px 20px;
     display: none;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
   }
-  .code-bar.show { display: flex; }
-  .code-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
-  .code-value { font-size: 16px; font-weight: 700; letter-spacing: 3px; font-family: 'Inter', monospace; }
-  .code-hint { font-size: 11px; color: var(--muted); }
+  .group-bar.show { display: flex; }
+  .group-bar-name { font-size: 13px; font-weight: 600; }
   .group-view-btn {
-    font-size: 12px; font-weight: 600; color: var(--text);
-    border: 1.5px solid var(--border); border-radius: 6px;
-    padding: 6px 12px; text-decoration: none; white-space: nowrap;
-    transition: border-color 0.15s;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; text-decoration: none; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
   }
-  .group-view-btn:hover { border-color: var(--text); }
+  .group-view-btn:hover { color: var(--text); border-color: #a1a1aa; }
 
   /* 凡例 */
   .legend {
@@ -236,11 +234,8 @@
     </a>
   </div>
 
-  <div class="code-bar" id="codeBanner">
-    <div>
-      <div class="code-label">グループコード — 他のメンバーに共有</div>
-      <div class="code-value" id="groupCode"></div>
-    </div>
+  <div class="group-bar" id="groupBar">
+    <span class="group-bar-name" id="groupBarName"></span>
     <a id="groupViewBtn" class="group-view-btn" href="#">全員の回答を見る →</a>
   </div>
 
@@ -339,10 +334,10 @@ function buildGrid() {
     return tr;
   };
 
-  tbody.appendChild(makeSection('☀️', '昼の部', 'sec-dot-day'));
+  tbody.appendChild(makeSection('☀️', '昼', 'sec-dot-day'));
 
   TIMES.forEach((time, i) => {
-    if (i === 1) tbody.appendChild(makeSection('🌙', '夜の部', 'sec-dot-night'));
+    if (i === 1) tbody.appendChild(makeSection('🌙', '夜', 'sec-dot-night'));
 
     const tr = document.createElement('tr');
     const tdT = document.createElement('td');
@@ -409,8 +404,8 @@ async function init() {
   if (me.type === 'group' && me.groupName) {
     document.getElementById('groupTag').textContent = me.groupName;
     const code = GROUP_CODE || me.groupCode;
-    document.getElementById('groupCode').textContent = code;
-    document.getElementById('codeBanner').classList.add('show');
+    document.getElementById('groupBarName').textContent = me.groupName;
+    document.getElementById('groupBar').classList.add('show');
     document.getElementById('groupViewBtn').href = `/group.html?code=${code}&token=${TOKEN}`;
   }
 
