@@ -184,16 +184,17 @@
     <button class="btn" onclick="createGroup()">グループを作ってフォームへ</button>
     <div class="err" id="createErr"></div>
     <div class="divider">または</div>
-    <button class="btn btn-ghost" onclick="switchSub('join')">グループコードで参加する</button>
+    <button class="btn btn-ghost" onclick="switchSub('join')">既存のグループに参加する</button>
   </div>
 
   <!-- グループ参加 -->
   <div class="panel" id="panel-join">
     <div class="field">
-      <label>参加するグループを選択</label>
-      <div id="groupList" class="group-list">
-        <div class="loading-groups">読み込み中…</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="margin:0">参加するグループを選択</label>
+        <span onclick="loadGroupList()" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">再読み込み</span>
       </div>
+      <div id="groupList" class="group-list"></div>
     </div>
     <div class="field" id="joinNameField" style="display:none">
       <label>あなたの名前</label>
@@ -215,6 +216,7 @@ function selectType(type) {
   ['solo','group'].forEach(t => document.getElementById('card-' + t).classList.toggle('active', t === type));
   ['solo','create','join'].forEach(p => document.getElementById('panel-' + p).classList.remove('show'));
   document.getElementById(type === 'solo' ? 'panel-solo' : 'panel-create').classList.add('show');
+  if (type === 'group') loadGroupList(); // バックグラウンドで先読み
 }
 
 let selectedGroupCode = null;
