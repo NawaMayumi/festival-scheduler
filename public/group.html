@@ -34,35 +34,8 @@
 
   .content { padding: 16px; max-width: 760px; margin: 0 auto; }
 
-  /* ---- 自分の回答エリア ---- */
-  .my-section { margin-bottom: 20px; }
-  .section-heading { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .section-heading::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-  .cal-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .cal { width: 100%; border-collapse: separate; border-spacing: 0; }
-  .cal thead th { padding: 0; text-align: center; }
-  .cal thead th.corner { width: 58px; min-width: 58px; }
-  .day-col { background: var(--surface); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 4px 6px; margin: 0 3px; display: block; }
-  .day-month { font-size: 10px; color: var(--muted); font-weight: 500; }
-  .day-num { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; margin: 1px 0; }
-  .day-dow { font-size: 10px; font-weight: 600; }
-  .wed { color: #2563eb; } .thu { color: #7c3aed; } .fri { color: #dc2626; }
-  .cal tbody td { padding: 2px 3px; }
-  .cal tbody td.tc { padding: 2px 4px 2px 0; text-align: right; vertical-align: middle; }
-  .tlabel { font-size: 10px; color: #a1a1aa; white-space: nowrap; }
-  .sec-row td { padding: 10px 3px 3px; }
-  .sec-label { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
-  .sec-dot { width: 5px; height: 5px; border-radius: 50%; }
-  .sec-dot-day { background: #f59e0b; } .sec-dot-night { background: #6366f1; }
-
-  .cell { width: 100%; height: 40px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; transition: border-color .1s, background .1s; touch-action: none; }
-  .cell:hover { border-color: #a1a1aa; }
-  .s-yes   { background: var(--yes-bg);   border-color: #86efac; color: var(--yes); }
-  .s-maybe { background: var(--maybe-bg); border-color: #fcd34d; color: var(--maybe); }
-  .s-no    { background: var(--no-bg);    border-color: #fca5a5; color: var(--no); }
-
-  .save-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+  .save-bar { display: none; position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 11px 20px; align-items: center; gap: 12px; z-index: 9; }
+  .save-bar.show { display: flex; }
   .counts { display: flex; gap: 10px; }
   .cnt { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 3px; }
   .cnt-yes { color: var(--yes); } .cnt-maybe { color: var(--maybe); } .cnt-no { color: var(--no); }
@@ -72,11 +45,10 @@
   .save-btn:hover { opacity: 0.8; }
   .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; z-index: 100; }
+  .toast { position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 10px 20px; border-radius: 100px; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap; z-index: 100; }
   .toast.show { opacity: 1; }
 
-  /* ---- メンバー比較テーブル ---- */
-  .compare-section { margin-top: 4px; }
+  /* 比較テーブル */
   .day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
   .day-title { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
   .day-title strong { font-size: 14px; color: var(--text); }
@@ -84,17 +56,36 @@
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   thead th { padding: 7px 8px; font-size: 11px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); text-align: center; white-space: nowrap; }
   thead th.hc { text-align: left; min-width: 82px; }
-  tbody td { padding: 4px 6px; border-bottom: 1px solid var(--bg); text-align: center; }
+  thead th.me-head { color: var(--text); background: #f4f4f5; }
+  tbody td { padding: 3px 5px; border-bottom: 1px solid var(--bg); text-align: center; vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
-  td.tl { text-align: left; font-size: 11px; color: var(--muted); white-space: nowrap; padding-left: 16px; }
-  .chip { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 24px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  td.tl { text-align: left; font-size: 11px; color: var(--muted); white-space: nowrap; padding-left: 14px; }
+  td.me-col { background: #fafafa; padding: 2px 4px; }
+
+  /* 読み取り専用チップ */
+  .chip { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 26px; border-radius: 4px; font-size: 12px; font-weight: 700; }
   .c-yes   { background: var(--yes-bg);   color: var(--yes); }
   .c-maybe { background: var(--maybe-bg); color: var(--maybe); }
   .c-no    { background: var(--no-bg);    color: var(--no); }
   .c-na    { background: var(--bg);       color: #d4d4d8; font-size: 10px; }
-  .row-allok td { background: #f0fdf4; }
+
+  /* 編集可能セル（自分の列） */
+  .cell {
+    width: 100%; height: 34px;
+    border: 1px solid var(--border); border-radius: 5px;
+    background: var(--surface); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    transition: border-color .1s, background .1s;
+    touch-action: none;
+  }
+  .cell:hover { border-color: #a1a1aa; }
+  .s-yes   { background: var(--yes-bg);   border-color: #86efac; color: var(--yes); }
+  .s-maybe { background: var(--maybe-bg); border-color: #fcd34d; color: var(--maybe); }
+  .s-no    { background: var(--no-bg);    border-color: #fca5a5; color: var(--no); }
+
+  .row-allok td { background: #f0fdf4 !important; }
   .no-ans { display: block; font-size: 10px; color: #d4d4d8; margin-top: 1px; }
-  .me-col { background: #fafafa; }
 
   #loading { text-align: center; padding: 80px 20px; font-size: 14px; color: var(--muted); }
 </style>
@@ -117,49 +108,26 @@
   <div class="legend-item"><div class="ldot l-maybe">△</div>たぶん大丈夫</div>
   <div class="legend-item"><div class="ldot l-no">✗</div>参加できない</div>
   <div class="legend-item"><div class="ldot l-na">—</div>未回答</div>
-  <span class="legend-hint">自分の行はそのまま編集できます</span>
+  <span class="legend-hint">自分の列はタップして編集できます</span>
 </div>
 
 <div id="loading">読み込み中</div>
-
 <div class="content" id="content" style="display:none">
-  <!-- 自分の回答 -->
-  <div class="my-section" id="mySection" style="display:none">
-    <div class="section-heading">あなたの回答（<span id="myName"></span>）</div>
-    <div class="cal-wrap">
-      <table class="cal">
-        <thead>
-          <tr>
-            <th class="corner"></th>
-            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">1</div><div class="day-dow wed">水</div></div></th>
-            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">2</div><div class="day-dow thu">木</div></div></th>
-            <th><div class="day-col"><div class="day-month">7月</div><div class="day-num">3</div><div class="day-dow fri">金</div></div></th>
-          </tr>
-        </thead>
-        <tbody id="myCalBody"></tbody>
-      </table>
-    </div>
-    <div class="save-row">
-      <div class="counts">
-        <div class="cnt cnt-yes"><div class="cdot cdot-yes"></div>○ <span id="cntYes">0</span></div>
-        <div class="cnt cnt-maybe"><div class="cdot cdot-maybe"></div>△ <span id="cntMaybe">0</span></div>
-        <div class="cnt cnt-no"><div class="cdot cdot-no"></div>✗ <span id="cntNo">0</span></div>
-      </div>
-      <button class="save-btn" id="saveBtn" onclick="save()">保存する</button>
-    </div>
-  </div>
+  <div id="compareContainer"></div>
+</div>
 
-  <!-- メンバー比較 -->
-  <div class="compare-section">
-    <div class="section-heading">メンバー全員の回答</div>
-    <div id="compareContainer"></div>
+<div class="save-bar" id="saveBar">
+  <div class="counts">
+    <div class="cnt cnt-yes"><div class="cdot cdot-yes"></div>○ <span id="cntYes">0</span></div>
+    <div class="cnt cnt-maybe"><div class="cdot cdot-maybe"></div>△ <span id="cntMaybe">0</span></div>
+    <div class="cnt cnt-no"><div class="cdot cdot-no"></div>✗ <span id="cntNo">0</span></div>
   </div>
+  <button class="save-btn" id="saveBtn" onclick="save()">保存する</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const DATES = ['7/1','7/2','7/3'];
 const DATE_LABELS = [
   { key:'7/1', label:'7月1日', dow:'水曜日' },
   { key:'7/2', label:'7月2日', dow:'木曜日' },
@@ -170,193 +138,231 @@ TIMES.push({ start:'12:30', end:'13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m===30?h+1:h, em = m===30?0:30;
+    const eh = m===30?h+1:h, em=m===30?0:30;
     TIMES.push({ start:s, end:`${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
 
-const params = new URLSearchParams(location.search);
-const CODE  = params.get('code');
-const TOKEN = params.get('token');
+const params   = new URLSearchParams(location.search);
+const CODE     = params.get('code');
+const TOKEN    = params.get('token');
+let mySlots    = {};
+let myName     = null;
+let dragging   = false, dragState = null;
 
 const NEXT   = { empty:'yes', yes:'maybe', maybe:'no', no:'empty' };
 const LABELS = { yes:'○', maybe:'△', no:'✗', empty:'' };
 const CLS    = { yes:'s-yes', maybe:'s-maybe', no:'s-no', empty:'' };
 
-let mySlots = {};
-let dragging = false, dragState = null;
-
 function norm(v) {
-  if (v===true  || v==='yes')   return 'yes';
-  if (v==='maybe')              return 'maybe';
-  if (v===false || v==='no')    return 'no';
+  if (v===true  || v==='yes')  return 'yes';
+  if (v==='maybe')             return 'maybe';
+  if (v===false || v==='no')   return 'no';
   return null;
 }
 
-function getState(key) { return mySlots[key] || 'empty'; }
+function getState(key) {
+  const n = norm(mySlots[key]);
+  return n || 'empty';
+}
 
-function applyCell(el, key, state) {
-  mySlots[key] = state;
-  el.className = `cell ${CLS[state]}`;
-  el.textContent = LABELS[state];
+// すべての同一キーのセルを一括更新（比較テーブルのみ自分の列にセルがある）
+function applyByKey(key, state) {
+  if (state === 'empty') delete mySlots[key];
+  else mySlots[key] = state;
+
+  document.querySelectorAll(`.cell[data-key]`).forEach(el => {
+    if (el.dataset.key === key) {
+      el.className = `cell ${CLS[state]}`;
+      el.textContent = LABELS[state];
+    }
+  });
   updateCounts();
+  // 全員○かどうか行ハイライトを更新
+  const row = document.querySelector(`tr[data-row="${CSS.escape(key)}"]`);
+  if (row) updateRowHighlight(row, key);
 }
 
-function updateCounts() {
-  const v = Object.values(mySlots);
-  document.getElementById('cntYes').textContent   = v.filter(x=>x==='yes').length;
-  document.getElementById('cntMaybe').textContent = v.filter(x=>x==='maybe').length;
-  document.getElementById('cntNo').textContent    = v.filter(x=>x==='no').length;
+function updateRowHighlight(row, key) {
+  // この行のすべてのchipとcellを確認
+  const chips = row.querySelectorAll('.chip');
+  const cells = row.querySelectorAll('.cell');
+  const allAnswered = chips.length + cells.length > 0;
+  const allOk = allAnswered &&
+    [...chips].every(c => c.classList.contains('c-yes')) &&
+    [...cells].every(c => c.classList.contains('s-yes'));
+  row.classList.toggle('row-allok', allOk);
 }
 
-function startDrag(el, key) { dragging=true; dragState=NEXT[getState(key)]; applyCell(el,key,dragState); }
-function enterCell(el, key) { if(dragging) applyCell(el,key,dragState); }
-function endDrag() { dragging=false; dragState=null; }
+function startDrag(key) {
+  dragging  = true;
+  dragState = NEXT[getState(key)];
+  applyByKey(key, dragState);
+}
+function enterDrag(key) {
+  if (dragging) applyByKey(key, dragState);
+}
+function endDrag() { dragging = false; dragState = null; }
 
 document.addEventListener('touchmove', e => {
   if (!dragging) return;
   e.preventDefault();
   const el = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY)?.closest('.cell[data-key]');
-  if (el) enterCell(el, el.dataset.key);
+  if (el) enterDrag(el.dataset.key);
 }, { passive:false });
 document.addEventListener('touchend', endDrag);
 document.addEventListener('mouseup', endDrag);
 
-function buildMyGrid(savedSlots) {
-  mySlots = {};
-  Object.entries(savedSlots).forEach(([k,v]) => {
-    const n = norm(v);
-    if (n) mySlots[k] = n;
-  });
+function updateCounts() {
+  const v = Object.values(mySlots).map(x => norm(x)).filter(Boolean);
+  document.getElementById('cntYes').textContent   = v.filter(x=>x==='yes').length;
+  document.getElementById('cntMaybe').textContent = v.filter(x=>x==='maybe').length;
+  document.getElementById('cntNo').textContent    = v.filter(x=>x==='no').length;
+}
 
-  const tbody = document.getElementById('myCalBody');
-  tbody.innerHTML = '';
+function makeEditCell(key) {
+  const state = getState(key);
+  const cell = document.createElement('div');
+  cell.className = `cell ${CLS[state]}`;
+  cell.textContent = LABELS[state];
+  cell.dataset.key = key;
+  cell.addEventListener('mousedown', e => { e.preventDefault(); startDrag(key); });
+  cell.addEventListener('mouseenter', () => enterDrag(key));
+  cell.addEventListener('touchstart', e => { e.preventDefault(); startDrag(key); }, { passive:false });
+  return cell;
+}
 
-  const makeHdr = (emoji, label, dotClass) => {
-    const tr = document.createElement('tr');
-    tr.className = 'sec-row';
-    tr.innerHTML = `<td colspan="4"><div class="sec-label"><span class="sec-dot ${dotClass}"></span>${emoji} ${label}</div></td>`;
-    return tr;
-  };
+function buildCompare(members) {
+  const container = document.getElementById('compareContainer');
+  container.innerHTML = '';
 
-  tbody.appendChild(makeHdr('☀️','昼','sec-dot-day'));
-  TIMES.forEach((time, i) => {
-    if (i===1) tbody.appendChild(makeHdr('🌙','夜','sec-dot-night'));
-    const tr = document.createElement('tr');
-    const tdT = document.createElement('td');
-    tdT.className = 'tc';
-    tdT.innerHTML = `<span class="tlabel">${time.start}</span>`;
-    tr.appendChild(tdT);
-    DATES.forEach(date => {
-      const key = `${date}_${time.start}`;
-      const state = getState(key);
-      const td = document.createElement('td');
-      const cell = document.createElement('div');
-      cell.className = `cell ${CLS[state]}`;
-      cell.textContent = LABELS[state];
-      cell.dataset.key = key;
-      cell.addEventListener('mousedown', e => { e.preventDefault(); startDrag(cell,key); });
-      cell.addEventListener('mouseenter', () => enterCell(cell,key));
-      cell.addEventListener('touchstart', e => { e.preventDefault(); startDrag(cell,key); }, {passive:false});
-      td.appendChild(cell);
-      tr.appendChild(td);
+  // 未回答メンバーは「—」を表示するが自分の列は編集可能
+  DATE_LABELS.forEach(date => {
+    const card = document.createElement('div');
+    card.className = 'day-card';
+
+    // ヘッダー行
+    const thead = document.createElement('thead');
+    const hRow = document.createElement('tr');
+    const th0 = document.createElement('th');
+    th0.className = 'hc';
+    th0.textContent = '時間帯';
+    hRow.appendChild(th0);
+    members.forEach(m => {
+      const th = document.createElement('th');
+      th.className = m.name === myName ? 'me-head' : '';
+      th.innerHTML = m.name + (Object.keys(m.slots).length === 0 ? `<span class="no-ans">未回答</span>` : '');
+      hRow.appendChild(th);
     });
-    tbody.appendChild(tr);
+    thead.appendChild(hRow);
+
+    // データ行
+    const tbody = document.createElement('tbody');
+    TIMES.forEach(t => {
+      const key = `${date.key}_${t.start}`;
+      const tr = document.createElement('tr');
+      tr.dataset.row = key;
+
+      const tdT = document.createElement('td');
+      tdT.className = 'tl';
+      tdT.textContent = `${t.start}〜${t.end}`;
+      tr.appendChild(tdT);
+
+      members.forEach(m => {
+        const td = document.createElement('td');
+        const isMe = m.name === myName;
+
+        if (isMe) {
+          // 編集可能セル
+          td.className = 'me-col';
+          td.appendChild(makeEditCell(key));
+        } else {
+          // 読み取り専用チップ
+          const hasData = Object.keys(m.slots).length > 0;
+          if (!hasData) {
+            td.innerHTML = '<span class="chip c-na">—</span>';
+          } else {
+            const state = norm(m.slots[key]);
+            const cls = state==='yes'?'c-yes':state==='maybe'?'c-maybe':'c-no';
+            const lbl = state==='yes'?'○':state==='maybe'?'△':'✗';
+            td.innerHTML = `<span class="chip ${cls}">${lbl}</span>`;
+          }
+        }
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    // 全員○の行をハイライト
+    tbody.querySelectorAll('tr').forEach(row => {
+      const key = row.dataset.row;
+      if (key) updateRowHighlight(row, key);
+    });
+
+    const table = document.createElement('table');
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    const wrap = document.createElement('div');
+    wrap.className = 'grid-wrap';
+    wrap.appendChild(table);
+    card.innerHTML = `<div class="day-title"><strong>${date.label}</strong>${date.dow}</div>`;
+    card.appendChild(wrap);
+    container.appendChild(card);
   });
-  updateCounts();
 }
 
 async function save() {
   const btn = document.getElementById('saveBtn');
   btn.disabled = true; btn.textContent = '保存中…';
   const res = await fetch(`/api/availability/${TOKEN}`, {
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({slots:mySlots})
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ slots: mySlots })
   });
   btn.disabled = false; btn.textContent = '保存する';
   showToast(res.ok ? '保存しました' : 'エラーが発生しました');
-  if (res.ok) buildCompare(await (await fetch(`/api/group/${CODE}/availability`)).json(), myName);
 }
 
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 2500);
-}
-
-let myName = null;
-
-function buildCompare(members, currentName) {
-  const container = document.getElementById('compareContainer');
-  container.innerHTML = '';
-
-  DATE_LABELS.forEach(date => {
-    const card = document.createElement('div');
-    card.className = 'day-card';
-
-    const memberCols = members.map(m =>
-      `<th${m.name===currentName?' class="me-col"':''}>${m.name}${Object.keys(m.slots).length===0?'<span class="no-ans">未回答</span>':''}</th>`
-    ).join('');
-
-    const rows = TIMES.map(t => {
-      const key = `${date.key}_${t.start}`;
-      const answered = members.filter(m => Object.keys(m.slots).length > 0);
-      const allYes = answered.length > 0 && answered.every(m => norm(m.slots[key])==='yes');
-
-      const cells = members.map(m => {
-        const hasData = Object.keys(m.slots).length > 0;
-        const isMe = m.name === currentName;
-        if (!hasData) return `<td${isMe?' class="me-col"':''}><span class="chip c-na">—</span></td>`;
-        const state = norm(m.slots[key]);
-        const cls = state==='yes'?'c-yes':state==='maybe'?'c-maybe':'c-no';
-        const lbl = state==='yes'?'○':state==='maybe'?'△':'✗';
-        return `<td${isMe?' class="me-col"':''}><span class="chip ${cls}">${lbl}</span></td>`;
-      }).join('');
-
-      return `<tr${allYes?' class="row-allok"':''}><td class="tl">${t.start}〜${t.end}</td>${cells}</tr>`;
-    }).join('');
-
-    card.innerHTML = `
-      <div class="day-title"><strong>${date.label}</strong>${date.dow}</div>
-      <div class="grid-wrap">
-        <table>
-          <thead><tr><th class="hc">時間帯</th>${memberCols}</tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
-    container.appendChild(card);
-  });
+  setTimeout(() => el.classList.remove('show'), 2500);
 }
 
 async function init() {
   if (!CODE) { document.getElementById('loading').textContent = 'コードが指定されていません'; return; }
 
-  const requests = [
-    fetch(`/api/group/${CODE}`),
-    fetch(`/api/group/${CODE}/availability`),
-  ];
-  if (TOKEN) requests.push(fetch(`/api/me/${TOKEN}`), fetch(`/api/availability/${TOKEN}`));
+  const reqs = [fetch(`/api/group/${CODE}`), fetch(`/api/group/${CODE}/availability`)];
+  if (TOKEN) reqs.push(fetch(`/api/me/${TOKEN}`), fetch(`/api/availability/${TOKEN}`));
 
-  const results = await Promise.all(requests);
+  const results = await Promise.all(reqs);
   if (!results[0].ok) { document.getElementById('loading').textContent = 'グループが見つかりません'; return; }
 
   const group   = await results[0].json();
   const members = await results[1].json();
 
   document.getElementById('groupTitle').textContent = group.name;
-  document.getElementById('memberSub').textContent = `${members.length}人`;
+  document.getElementById('memberSub').textContent  = `${members.length}人`;
 
-  if (TOKEN) {
-    const me = await results[2].json();
+  if (TOKEN && results[2]) {
+    const me    = await results[2].json();
     const avail = await results[3].json();
     myName = me.name;
     document.getElementById('backLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
-    document.getElementById('myName').textContent = me.name;
-    document.getElementById('mySection').style.display = 'block';
-    buildMyGrid(avail.slots || {});
+
+    // 保存済みデータを読み込む
+    const raw = avail.slots || {};
+    mySlots = {};
+    Object.entries(raw).forEach(([k,v]) => {
+      const n = norm(v);
+      if (n) mySlots[k] = n;
+    });
+
+    document.getElementById('saveBar').classList.add('show');
+    updateCounts();
   }
 
-  buildCompare(members, myName);
+  buildCompare(members);
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').style.display = 'block';
 }
