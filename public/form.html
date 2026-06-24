@@ -3,67 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>出席可能日時フォーム</title>
+<title>打ち合わせ日程フォーム</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
-  .container { max-width: 500px; margin: 0 auto; }
-  .header { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  .header h1 { font-size: 18px; color: #1a1a2e; }
-  .header .name { font-size: 22px; font-weight: 700; color: #4f46e5; margin: 4px 0; }
-  .header .group-badge { display: inline-block; background: #eef2ff; color: #4f46e5; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 6px; }
-  .group-link { display: block; margin-top: 10px; padding: 10px; background: #f0fdf4; border-radius: 8px; text-decoration: none; color: #166534; font-size: 13px; font-weight: 600; text-align: center; border: 1px solid #bbf7d0; }
-  .group-link:hover { background: #dcfce7; }
-  .day-section { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  .day-title { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #f3f4f6; }
-  .slot { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; cursor: pointer; }
-  .slot:last-child { border-bottom: none; }
-  .slot input[type=checkbox] { width: 20px; height: 20px; accent-color: #4f46e5; margin-right: 12px; cursor: pointer; flex-shrink: 0; }
-  .slot label { font-size: 15px; color: #374151; cursor: pointer; user-select: none; }
-  .slot.checked label { color: #4f46e5; font-weight: 600; }
-  .slot.checked { background: #fafafe; border-radius: 6px; }
-  .submit-wrap { position: sticky; bottom: 20px; margin-top: 16px; }
-  .btn-submit { display: block; width: 100%; padding: 16px; background: #4f46e5; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(79,70,229,0.4); transition: all 0.15s; }
-  .btn-submit:hover { background: #4338ca; transform: translateY(-1px); }
-  .btn-submit:disabled { background: #a5b4fc; box-shadow: none; transform: none; cursor: not-allowed; }
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #16a34a; color: white; padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; }
+
+  /* ヘッダー */
+  .topbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .user-info h2 { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+  .user-info .group-tag { font-size: 11px; color: #7c3aed; font-weight: 600; }
+  .btn-gcal { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: #4285f4; cursor: pointer; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+  .btn-gcal:hover { background: #f0f7ff; border-color: #4285f4; }
+  .btn-gcal .gcal-icon { font-size: 16px; }
+
+  /* グループコードバナー */
+  .code-banner { background: linear-gradient(135deg, #ede9fe, #ddd6fe); border-bottom: 1px solid #c4b5fd; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .code-banner .label { font-size: 12px; color: #6d28d9; font-weight: 600; }
+  .code-banner .code { font-size: 20px; font-weight: 800; color: #4c1d95; letter-spacing: 3px; font-family: monospace; }
+  .code-banner .share-hint { font-size: 11px; color: #7c3aed; }
+  .btn-group-view { background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+  .btn-group-view:hover { background: #6d28d9; }
+
+  /* 凡例 */
+  .legend { padding: 10px 20px; background: white; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 16px; font-size: 12px; color: #666; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-cell { width: 28px; height: 20px; border-radius: 4px; }
+  .legend-cell.available { background: #22c55e; }
+  .legend-cell.empty { background: white; border: 1.5px solid #e5e7eb; }
+  .hint { font-size: 11px; color: #aaa; margin-left: auto; }
+
+  /* カレンダーグリッド */
+  .calendar-wrap { padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .calendar { min-width: 320px; width: 100%; border-collapse: separate; border-spacing: 0; }
+
+  /* ヘッダー行 */
+  .calendar thead th { padding: 0; text-align: center; }
+  .calendar thead th.corner { width: 72px; min-width: 72px; }
+  .day-header { background: white; border-radius: 12px 12px 0 0; padding: 10px 8px 8px; margin: 0 3px; display: block; }
+  .day-name { font-size: 11px; font-weight: 600; color: #888; }
+  .day-date { font-size: 22px; font-weight: 800; color: #1a1a2e; line-height: 1; margin: 2px 0; }
+  .day-dow { font-size: 11px; font-weight: 600; }
+  .day-dow.wed { color: #3b82f6; }
+  .day-dow.thu { color: #8b5cf6; }
+  .day-dow.fri { color: #ef4444; }
+
+  /* セル */
+  .calendar tbody tr td { padding: 2px 3px; }
+  .calendar tbody tr td.time-col { padding: 2px 8px 2px 0; text-align: right; white-space: nowrap; vertical-align: middle; }
+  .time-label { font-size: 11px; color: #9ca3af; font-weight: 500; }
+
+  .slot-cell { width: 100%; height: 44px; border-radius: 6px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; user-select: none; -webkit-user-select: none; }
+  .slot-cell:hover { border-color: #86efac; background: #f0fdf4; transform: scale(1.04); }
+  .slot-cell.available { background: #22c55e; border-color: #16a34a; color: white; box-shadow: 0 2px 8px rgba(34,197,94,0.35); }
+  .slot-cell.available:hover { background: #16a34a; transform: scale(1.04); }
+
+  /* セクション区切り（12:30 と 15:00 の間） */
+  .break-row td { height: 10px; }
+  .break-line { border: none; border-top: 2px dashed #e5e7eb; margin: 4px 3px; display: block; }
+
+  /* 送信エリア */
+  .submit-area { position: sticky; bottom: 0; background: white; border-top: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+  .submit-count { font-size: 12px; color: #888; }
+  .submit-count strong { color: #22c55e; font-size: 16px; }
+  .btn-submit { flex: 1; padding: 13px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34,197,94,0.4); }
+  .btn-submit:disabled { background: #d1d5db; box-shadow: none; transform: none; color: #9ca3af; cursor: not-allowed; }
+
+  /* トースト */
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; z-index: 100; }
+  .toast.success { background: #1a1a2e; color: white; }
+  .toast.error { background: #dc2626; color: white; }
   .toast.show { opacity: 1; }
-  .error-page { text-align: center; padding: 60px 20px; }
-  .error-page h2 { color: #dc2626; margin-bottom: 12px; }
-  .back-btn { display: inline-block; margin-top: 16px; color: #4f46e5; text-decoration: none; font-weight: 600; }
-  .select-all { font-size: 12px; color: #6b7280; cursor: pointer; margin-left: auto; }
-  .select-all:hover { color: #4f46e5; }
-  .count-badge { font-size: 12px; color: #6b7280; font-weight: 400; }
+
+  /* エラー */
+  .error-page { text-align: center; padding: 80px 20px; }
+  .error-page h2 { font-size: 20px; color: #dc2626; margin-bottom: 10px; }
+  .error-page p { color: #888; margin-bottom: 20px; }
+  .back-btn { display: inline-block; padding: 12px 24px; background: #6366f1; color: white; border-radius: 10px; text-decoration: none; font-weight: 700; }
+
+  @media (max-width: 400px) {
+    .slot-cell { height: 38px; }
+    .calendar-wrap { padding: 8px; }
+    .day-date { font-size: 18px; }
+  }
 </style>
 </head>
 <body>
-<div class="container">
-  <div id="loading" style="text-align:center;padding:60px 20px;color:#888;">読み込み中...</div>
-  <div id="errorPage" class="error-page" style="display:none">
-    <h2>リンクが無効です</h2>
-    <p>URLが正しくないか、有効期限が切れています。</p>
-    <a href="/" class="back-btn">トップに戻る</a>
+
+<div id="loading" style="text-align:center;padding:80px 20px;color:#888;font-size:15px;">読み込み中...</div>
+<div id="errorPage" class="error-page" style="display:none">
+  <h2>リンクが無効です</h2>
+  <p>URLが正しくないか、有効期限が切れています。</p>
+  <a href="/" class="back-btn">トップに戻る</a>
+</div>
+
+<div id="app" style="display:none">
+  <!-- ヘッダー -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="user-avatar" id="avatarChar"></div>
+      <div class="user-info">
+        <h2 id="displayName"></h2>
+        <div class="group-tag" id="groupTag"></div>
+      </div>
+    </div>
+    <a href="https://calendar.google.com" target="_blank" class="btn-gcal">
+      <span class="gcal-icon">📅</span> Googleカレンダー
+    </a>
   </div>
-  <div id="mainContent" style="display:none">
-    <div class="header">
-      <div style="font-size:13px;color:#888;">打ち合わせ候補日時の入力</div>
-      <div class="name" id="displayName"></div>
-      <div id="groupBadge"></div>
-      <a id="groupViewLink" class="group-link" style="display:none" href="#">👥 グループ全員の回答を見る</a>
+
+  <!-- グループコードバナー（グループのみ表示） -->
+  <div class="code-banner" id="codeBanner" style="display:none">
+    <div>
+      <div class="label">グループコード（他メンバーに共有）</div>
+      <div class="code" id="groupCode"></div>
+      <div class="share-hint">このコードをメンバー全員に送ってください</div>
     </div>
-    <div id="daysContainer"></div>
-    <div class="submit-wrap">
-      <button class="btn-submit" id="submitBtn" onclick="saveAvailability()">回答を送信する</button>
-    </div>
+    <a id="groupViewBtn" class="btn-group-view" href="#">👥 全員の回答を見る</a>
+  </div>
+
+  <!-- 凡例 -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-cell available"></div>参加できる</div>
+    <div class="legend-item"><div class="legend-cell empty"></div>参加できない / 未選択</div>
+    <span class="hint">セルをタップして切り替え</span>
+  </div>
+
+  <!-- カレンダーグリッド -->
+  <div class="calendar-wrap">
+    <table class="calendar">
+      <thead>
+        <tr>
+          <th class="corner"></th>
+          <th>
+            <div class="day-header">
+              <div class="day-name">7月</div>
+              <div class="day-date">1</div>
+              <div class="day-dow wed">水</div>
+            </div>
+          </th>
+          <th>
+            <div class="day-header">
+              <div class="day-name">7月</div>
+              <div class="day-date">2</div>
+              <div class="day-dow thu">木</div>
+            </div>
+          </th>
+          <th>
+            <div class="day-header">
+              <div class="day-name">7月</div>
+              <div class="day-date">3</div>
+              <div class="day-dow fri">金</div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="calBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 送信 -->
+  <div class="submit-area">
+    <div class="submit-count">参加可能: <strong id="countNum">0</strong> 枠</div>
+    <button class="btn-submit" id="submitBtn" onclick="save()">回答を保存する</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 const DATES = [
-  { key: '7/1', label: '7月1日（水）' },
-  { key: '7/2', label: '7月2日（木）' },
-  { key: '7/3', label: '7月3日（金）' }
+  { key: '7/1', col: 0 },
+  { key: '7/2', col: 1 },
+  { key: '7/3', col: 2 }
 ];
 
 const TIMES = [];
@@ -73,124 +187,126 @@ for (let h = 15; h < 21; h++) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     const eh = m === 30 ? h + 1 : h;
     const em = m === 30 ? 0 : 30;
-    const e = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
-    TIMES.push({ start: s, end: e });
+    TIMES.push({ start: s, end: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
 
 const params = new URLSearchParams(location.search);
 const TOKEN = params.get('token');
 const GROUP_CODE = params.get('code');
-let currentSlots = {};
+let slots = {};
 
-async function init() {
-  if (!TOKEN) { showError(); return; }
+function slotKey(dateKey, timeStart) { return `${dateKey}_${timeStart}`; }
 
-  const meRes = await fetch(`/api/me/${TOKEN}`);
-  if (!meRes.ok) { showError(); return; }
-  const me = await meRes.json();
-
-  document.getElementById('displayName').textContent = me.name;
-
-  if (me.type === 'group' && me.groupName) {
-    document.getElementById('groupBadge').innerHTML = `<span class="group-badge">グループ: ${me.groupName}（コード: ${me.groupCode}）</span>`;
-    const gLink = document.getElementById('groupViewLink');
-    gLink.style.display = 'block';
-    gLink.href = `/group.html?code=${me.groupCode}&token=${TOKEN}`;
-  }
-
-  const availRes = await fetch(`/api/availability/${TOKEN}`);
-  if (availRes.ok) {
-    const avail = await availRes.json();
-    currentSlots = avail.slots || {};
-  }
-
-  renderDays();
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('mainContent').style.display = 'block';
+function updateCount() {
+  const n = Object.values(slots).filter(Boolean).length;
+  document.getElementById('countNum').textContent = n;
 }
 
-function renderDays() {
-  const container = document.getElementById('daysContainer');
-  container.innerHTML = '';
-  DATES.forEach(date => {
-    const checked = TIMES.filter(t => currentSlots[`${date.key}_${t.start}`]).length;
-    const div = document.createElement('div');
-    div.className = 'day-section';
-    div.innerHTML = `
-      <div class="day-title">
-        ${date.label}
-        <span class="count-badge" id="count-${date.key}">（${checked}/${TIMES.length}）</span>
-        <span class="select-all" onclick="toggleAll('${date.key}')">全選択/解除</span>
-      </div>
-      ${TIMES.map(t => {
-        const key = `${date.key}_${t.start}`;
-        const isChecked = !!currentSlots[key];
-        return `
-          <div class="slot ${isChecked ? 'checked' : ''}" id="slot-${key.replace('/','_')}">
-            <input type="checkbox" id="cb-${key.replace('/','_')}" ${isChecked ? 'checked' : ''}
-              onchange="toggleSlot('${key}', this)">
-            <label for="cb-${key.replace('/','_')}">${t.start}〜${t.end}</label>
-          </div>`;
-      }).join('')}`;
-    container.appendChild(div);
+function toggleCell(dateKey, timeStart, el) {
+  const key = slotKey(dateKey, timeStart);
+  slots[key] = !slots[key];
+  el.classList.toggle('available', !!slots[key]);
+  el.textContent = slots[key] ? '○' : '';
+  updateCount();
+}
+
+function buildGrid() {
+  const tbody = document.getElementById('calBody');
+  tbody.innerHTML = '';
+
+  TIMES.forEach((time, i) => {
+    // 12:30 の後に区切り線
+    if (i === 1) {
+      const br = document.createElement('tr');
+      br.className = 'break-row';
+      br.innerHTML = `<td colspan="4"><div class="break-line"></div></td>`;
+      tbody.appendChild(br);
+    }
+
+    const tr = document.createElement('tr');
+    const tdTime = document.createElement('td');
+    tdTime.className = 'time-col';
+    tdTime.innerHTML = `<span class="time-label">${time.start}</span>`;
+    tr.appendChild(tdTime);
+
+    DATES.forEach(date => {
+      const key = slotKey(date.key, time.start);
+      const isAvail = !!slots[key];
+      const td = document.createElement('td');
+      const cell = document.createElement('div');
+      cell.className = 'slot-cell' + (isAvail ? ' available' : '');
+      cell.textContent = isAvail ? '○' : '';
+      cell.onclick = () => toggleCell(date.key, time.start, cell);
+      td.appendChild(cell);
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
   });
+  updateCount();
 }
 
-function toggleSlot(key, cb) {
-  currentSlots[key] = cb.checked;
-  const safeKey = key.replace('/','_');
-  const slotEl = document.getElementById('slot-' + safeKey);
-  if (slotEl) slotEl.className = 'slot' + (cb.checked ? ' checked' : '');
-  updateCount(key.split('_')[0]);
-}
-
-function updateCount(dateKey) {
-  const count = TIMES.filter(t => currentSlots[`${dateKey}_${t.start}`]).length;
-  const el = document.getElementById('count-' + dateKey);
-  if (el) el.textContent = `（${count}/${TIMES.length}）`;
-}
-
-function toggleAll(dateKey) {
-  const allChecked = TIMES.every(t => currentSlots[`${dateKey}_${t.start}`]);
-  TIMES.forEach(t => {
-    const key = `${dateKey}_${t.start}`;
-    currentSlots[key] = !allChecked;
-    const safeKey = key.replace('/','_');
-    const cb = document.getElementById('cb-' + safeKey);
-    const slotEl = document.getElementById('slot-' + safeKey);
-    if (cb) cb.checked = !allChecked;
-    if (slotEl) slotEl.className = 'slot' + (!allChecked ? ' checked' : '');
-  });
-  updateCount(dateKey);
-}
-
-async function saveAvailability() {
+async function save() {
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = '送信中...';
+  btn.textContent = '保存中...';
 
   const res = await fetch(`/api/availability/${TOKEN}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slots: currentSlots })
+    body: JSON.stringify({ slots })
   });
 
   btn.disabled = false;
-  btn.textContent = '回答を送信する';
+  btn.textContent = '回答を保存する';
 
   if (res.ok) {
-    showToast('✅ 回答を保存しました！');
+    toast('✅ 回答を保存しました！', 'success');
   } else {
-    showToast('❌ エラーが発生しました。もう一度お試しください。');
+    toast('❌ エラーが発生しました', 'error');
   }
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+async function init() {
+  if (!TOKEN) { showError(); return; }
+
+  const [meRes, availRes] = await Promise.all([
+    fetch(`/api/me/${TOKEN}`),
+    fetch(`/api/availability/${TOKEN}`)
+  ]);
+
+  if (!meRes.ok) { showError(); return; }
+  const me = await meRes.json();
+
+  // ヘッダー設定
+  document.getElementById('avatarChar').textContent = me.name[0];
+  document.getElementById('displayName').textContent = me.name + ' さん';
+
+  if (me.type === 'group' && me.groupName) {
+    document.getElementById('groupTag').textContent = `グループ: ${me.groupName}`;
+    const code = GROUP_CODE || me.groupCode;
+    document.getElementById('groupCode').textContent = code;
+    document.getElementById('codeBanner').style.display = 'flex';
+    document.getElementById('groupViewBtn').href = `/group.html?code=${code}&token=${TOKEN}`;
+  }
+
+  // 既存の回答を読み込む
+  if (availRes.ok) {
+    const avail = await availRes.json();
+    slots = avail.slots || {};
+  }
+
+  buildGrid();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
 }
 
 function showError() {
