@@ -4,121 +4,191 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理者ページ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text: #18181b;
+    --muted: #71717a;
+    --yes: #16a34a; --yes-bg: #dcfce7;
+    --maybe: #d97706; --maybe-bg: #fef3c7;
+    --no: #dc2626; --no-bg: #fee2e2;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
+  body { font-family: 'Inter','Noto Sans JP',sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
 
-  .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .login-box { background: white; border-radius: 20px; padding: 36px 28px; max-width: 360px; width: 100%; box-shadow: 0 8px 30px rgba(0,0,0,0.1); }
-  .login-box h1 { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
-  .login-box p { font-size: 13px; color: #888; margin-bottom: 24px; }
-  input[type=password] { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 10px; }
-  input[type=password]:focus { border-color: #6366f1; }
-  .btn-login { width: 100%; padding: 13px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
-  .err { color: #dc2626; font-size: 13px; margin-top: 8px; display: none; }
+  /* ログイン */
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .login-box { width: 100%; max-width: 360px; }
+  .login-box .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 12px; display: inline-block; margin-bottom: 20px;
+  }
+  .login-box h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 24px; }
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+  .field input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: inherit; color: var(--text);
+    outline: none; transition: border-color 0.15s; background: var(--surface);
+  }
+  .field input:focus { border-color: var(--text); }
+  .btn-login {
+    width: 100%; padding: 12px; margin-top: 4px;
+    background: var(--text); color: white;
+    border: none; border-radius: 8px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-login:hover { opacity: 0.8; }
+  .login-err { font-size: 12px; color: var(--no); margin-top: 8px; display: none; }
+  .back-to-top { display: block; text-align: center; margin-top: 20px; font-size: 12px; color: var(--muted); text-decoration: none; }
+  .back-to-top:hover { color: var(--text); }
 
+  /* ダッシュボード */
   #dashboard { display: none; }
-  .topbar { background: #1a1a2e; border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .topbar h1 { color: white; font-size: 16px; font-weight: 700; }
-  .topbar-btns { display: flex; gap: 8px; }
-  .btn-sm { padding: 7px 14px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .btn-ref { background: #374151; color: #d1d5db; }
-  .btn-ref:hover { background: #4b5563; }
-  .btn-out { background: #dc2626; color: white; }
-  .btn-out:hover { background: #b91c1c; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 13px 20px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar h1 { font-size: 15px; font-weight: 700; }
+  .topbar-actions { display: flex; gap: 8px; }
+  .btn-sm {
+    font-size: 12px; font-weight: 500; padding: 6px 12px;
+    border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted);
+    cursor: pointer; font-family: inherit; transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-sm:hover { color: var(--text); border-color: #a1a1aa; }
+  .btn-sm.danger { color: var(--no); border-color: #fca5a5; }
+  .btn-sm.danger:hover { background: var(--no-bg); }
 
-  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  .stat { background: white; border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 90px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-  .stat .num { font-size: 26px; font-weight: 800; color: #6366f1; }
-  .stat .lbl { font-size: 11px; color: #888; margin-top: 2px; }
+  .content { padding: 16px; max-width: 800px; margin: 0 auto; }
 
-  .card { background: white; border-radius: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
-  .card-head { padding: 14px 18px; background: #fafafa; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .card-head h2 { font-size: 16px; font-weight: 700; color: #1a1a2e; }
-  .badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 5px; }
-  .badge-solo  { background: #dbeafe; color: #1e40af; }
-  .badge-group { background: #ede9fe; color: #6d28d9; }
-  .badge-code  { background: #f3f4f6; color: #374151; font-family: monospace; letter-spacing: 1px; font-size: 12px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat .num { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-  .member-block { padding: 14px 18px; border-bottom: 1px solid #f5f5f5; }
-  .member-block:last-child { border-bottom: none; }
-  .member-name { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-  .updated { font-size: 10px; color: #aaa; font-weight: 400; }
-  .status-chips { display: flex; gap: 8px; margin-bottom: 8px; }
-  .chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
-  .chip-yes   { background: #dcfce7; color: #15803d; }
-  .chip-maybe { background: #fef3c7; color: #d97706; }
-  .chip-no    { background: #fee2e2; color: #dc2626; }
-  .chip-na    { background: #f3f4f6; color: #9ca3af; }
+  .performer-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; overflow: hidden;
+  }
+  .card-head {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-head h2 { font-size: 15px; font-weight: 700; flex: 1; }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .badge-code { font-family: 'Inter', monospace; letter-spacing: 1px; }
 
-  .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { border-collapse: collapse; font-size: 12px; }
-  .gtable th { padding: 5px 8px; font-size: 10px; color: #9ca3af; font-weight: 600; background: #f9fafb; text-align: center; white-space: nowrap; }
-  .gtable th.tc { text-align: left; min-width: 85px; }
-  .gtable td { padding: 3px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; }
-  .gtable td.tl { text-align: left; font-size: 11px; color: #6b7280; white-space: nowrap; padding-left: 4px; }
-  .date-sep { background: #eef2ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 5px 8px; text-align: left; }
-  .c-yes   { color: #16a34a; font-weight: 700; }
-  .c-maybe { color: #d97706; font-weight: 700; }
-  .c-no    { color: #dc2626; }
-  .c-na    { color: #d1d5db; }
+  .member-row { padding: 14px 16px; border-bottom: 1px solid var(--bg); }
+  .member-row:last-child { border-bottom: none; }
+  .member-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .member-name { font-size: 14px; font-weight: 600; }
+  .updated-at { font-size: 11px; color: var(--muted); margin-left: auto; }
+  .status-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .status-chip {
+    font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  }
+  .chip-yes   { background: var(--yes-bg); color: var(--yes); }
+  .chip-maybe { background: var(--maybe-bg); color: var(--maybe); }
+  .chip-no    { background: var(--no-bg); color: var(--no); }
+  .chip-na    { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
 
-  #loading { text-align: center; padding: 40px; color: #888; }
-  .empty { text-align: center; padding: 40px; color: #aaa; font-size: 14px; }
+  .avail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .day-col .day-head {
+    font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  }
+  .slot-line {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 3px 0; font-size: 12px; border-bottom: 1px solid var(--bg);
+  }
+  .slot-line:last-child { border-bottom: none; }
+  .slot-time { color: var(--muted); }
+  .s-yes   { color: var(--yes); font-weight: 700; }
+  .s-maybe { color: var(--maybe); font-weight: 700; }
+  .s-no    { color: var(--no); }
+  .s-na    { color: #d4d4d8; }
+
+  #loading { text-align: center; padding: 60px 20px; font-size: 14px; color: var(--muted); }
+  .empty   { text-align: center; padding: 60px 20px; font-size: 14px; color: var(--muted); }
 </style>
 </head>
 <body>
 
-<div class="login-wrap" id="loginPage">
+<!-- ログイン -->
+<div class="login-page" id="loginPage">
   <div class="login-box">
-    <h1>🔐 管理者ログイン</h1>
-    <p>実行委員会専用ページ</p>
-    <input type="password" id="pw" placeholder="パスワード" onkeydown="if(event.key==='Enter')login()">
+    <div class="eyebrow">実行委員会専用</div>
+    <h1>管理者ページ</h1>
+    <div class="field">
+      <label>パスワード</label>
+      <input type="password" id="pw" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')login()">
+    </div>
     <button class="btn-login" onclick="login()">ログイン</button>
-    <div class="err" id="loginErr"></div>
-    <div style="margin-top:16px;text-align:center"><a href="/" style="font-size:13px;color:#aaa">← トップに戻る</a></div>
+    <div class="login-err" id="loginErr"></div>
+    <a href="/" class="back-to-top">← トップに戻る</a>
   </div>
 </div>
 
+<!-- ダッシュボード -->
 <div id="dashboard">
   <div class="topbar">
-    <h1>📋 管理者ダッシュボード</h1>
-    <div class="topbar-btns">
-      <button class="btn-sm btn-ref" onclick="loadAll()">🔄 更新</button>
-      <button class="btn-sm btn-out" onclick="logout()">ログアウト</button>
+    <h1>管理者ダッシュボード</h1>
+    <div class="topbar-actions">
+      <button class="btn-sm" onclick="loadAll()">更新</button>
+      <button class="btn-sm danger" onclick="logout()">ログアウト</button>
     </div>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="num" id="sTotal">—</div><div class="lbl">グループ・出演者数</div></div>
-    <div class="stat"><div class="num" id="sMembers">—</div><div class="lbl">総メンバー数</div></div>
-    <div class="stat"><div class="num" id="sResponded">—</div><div class="lbl">回答済み</div></div>
+  <div class="content">
+    <div class="stats">
+      <div class="stat"><div class="num" id="sTotal">—</div><div class="lbl">出演者・グループ</div></div>
+      <div class="stat"><div class="num" id="sMembers">—</div><div class="lbl">総メンバー数</div></div>
+      <div class="stat"><div class="num" id="sResponded">—</div><div class="lbl">回答済み</div></div>
+    </div>
+    <div id="loading">読み込み中</div>
+    <div id="list"></div>
   </div>
-
-  <div id="loading">読み込み中...</div>
-  <div id="list"></div>
 </div>
 
 <script>
 const DATES = [
-  { key: '7/1', label: '7月1日（水）' },
-  { key: '7/2', label: '7月2日（木）' },
-  { key: '7/3', label: '7月3日（金）' }
+  { key:'7/1', label:'7/1（水）' },
+  { key:'7/2', label:'7/2（木）' },
+  { key:'7/3', label:'7/3（金）' },
 ];
 const TIMES = [];
-TIMES.push({ start: '12:30', end: '13:00' });
+TIMES.push({ start:'12:30', end:'13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m === 30 ? h + 1 : h, em = m === 30 ? 0 : 30;
-    TIMES.push({ start: s, end: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
+    const eh = m===30 ? h+1 : h, em = m===30 ? 0 : 30;
+    TIMES.push({ start:s, end:`${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
 
-function normalize(v) {
-  if (v === true || v === 'yes') return 'yes';
-  if (v === 'maybe') return 'maybe';
-  return 'no';
+function norm(v) {
+  if (v === true  || v === 'yes')  return 'yes';
+  if (v === 'maybe')               return 'maybe';
+  if (v === false || v === 'no')   return 'no';
+  return null;
 }
 
 async function login() {
@@ -126,8 +196,7 @@ async function login() {
   const err = document.getElementById('loginErr');
   err.style.display = 'none';
   const res = await fetch('/api/admin/login', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ password: pw })
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ password:pw })
   });
   if (res.ok) {
     document.getElementById('loginPage').style.display = 'none';
@@ -135,13 +204,13 @@ async function login() {
     loadAll();
   } else {
     const d = await res.json();
-    err.textContent = d.error || 'ログイン失敗';
+    err.textContent = d.error || 'ログインに失敗しました';
     err.style.display = 'block';
   }
 }
 
 async function logout() {
-  await fetch('/api/admin/logout', { method: 'POST' });
+  await fetch('/api/admin/logout', { method:'POST' });
   location.reload();
 }
 
@@ -149,71 +218,79 @@ async function loadAll() {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('list').innerHTML = '';
   const res = await fetch('/api/admin/all');
-  if (!res.ok) { document.getElementById('loading').textContent = 'データ取得失敗'; return; }
+  if (!res.ok) { document.getElementById('loading').textContent = 'データ取得に失敗しました'; return; }
   const data = await res.json();
   document.getElementById('loading').style.display = 'none';
 
-  const totalM = data.reduce((s, g) => s + g.members.length, 0);
-  const responded = data.reduce((s, g) => s + g.members.filter(m => Object.keys(m.slots).length > 0).length, 0);
-  document.getElementById('sTotal').textContent = data.length;
-  document.getElementById('sMembers').textContent = totalM;
+  const totalM    = data.reduce((s,g) => s + g.members.length, 0);
+  const responded = data.reduce((s,g) => s + g.members.filter(m => Object.keys(m.slots).length > 0).length, 0);
+  document.getElementById('sTotal').textContent    = data.length;
+  document.getElementById('sMembers').textContent  = totalM;
   document.getElementById('sResponded').textContent = responded;
 
-  if (!data.length) { document.getElementById('list').innerHTML = '<div class="empty">まだ登録された出演者がいません</div>'; return; }
+  if (!data.length) {
+    document.getElementById('list').innerHTML = '<div class="empty">まだ登録された出演者がいません</div>';
+    return;
+  }
 
   const list = document.getElementById('list');
   data.forEach(group => {
     const card = document.createElement('div');
-    card.className = 'card';
-    const codeHtml = group.code ? `<span class="badge badge-code">${group.code}</span>` : '';
-    const bClass = group.type === 'solo' ? 'badge-solo' : 'badge-group';
-    const bText = group.type === 'solo' ? 'ソロ' : 'グループ';
+    card.className = 'performer-card';
 
-    let membersHtml = group.members.map(m => {
+    const codeHtml = group.code ? `<span class="badge badge-code">${group.code}</span>` : '';
+    const typeHtml = `<span class="badge">${group.type === 'solo' ? 'ソロ' : 'グループ'}</span>`;
+
+    const membersHtml = group.members.map(m => {
       const hasData = Object.keys(m.slots).length > 0;
-      const upd = m.updatedAt ? new Date(m.updatedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : null;
-      const updHtml = upd ? `<span class="updated">更新: ${upd}</span>` : '';
+      const upd = m.updatedAt
+        ? new Date(m.updatedAt).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})
+        : null;
 
       if (!hasData) {
-        return `<div class="member-block">
-          <div class="member-name">${group.type === 'group' ? '👤 ' : ''}${m.name} ${updHtml}</div>
-          <div class="chip chip-na">未回答</div>
+        return `<div class="member-row">
+          <div class="member-head">
+            <div class="member-name">${group.type === 'group' ? m.name : ''}</div>
+          </div>
+          <span class="status-chip chip-na">未回答</span>
         </div>`;
       }
 
-      const yes = Object.values(m.slots).filter(v => normalize(v) === 'yes').length;
-      const maybe = Object.values(m.slots).filter(v => normalize(v) === 'maybe').length;
-      const no = TIMES.length * DATES.length - yes - maybe;
+      const yes   = Object.values(m.slots).filter(v => norm(v)==='yes').length;
+      const maybe = Object.values(m.slots).filter(v => norm(v)==='maybe').length;
+      const no    = Object.values(m.slots).filter(v => norm(v)==='no').length;
 
-      const rows = DATES.map(date => {
-        const dateRow = `<tr><td colspan="2" class="date-sep">${date.label}</td></tr>`;
-        const timeRows = TIMES.map(t => {
+      const dayColumns = DATES.map(date => {
+        const slotLines = TIMES.map(t => {
           const key = `${date.key}_${t.start}`;
-          const state = normalize(m.slots[key]);
-          const lbl = state === 'yes' ? '○' : state === 'maybe' ? '△' : '✗';
-          const cls = `c-${state}`;
-          return `<tr><td class="tl">${t.start}〜${t.end}</td><td class="${cls}">${lbl}</td></tr>`;
+          const state = norm(m.slots[key]);
+          const cls = state === 'yes' ? 's-yes' : state === 'maybe' ? 's-maybe' : state === 'no' ? 's-no' : 's-na';
+          const lbl = state === 'yes' ? '○' : state === 'maybe' ? '△' : state === 'no' ? '✗' : '—';
+          return `<div class="slot-line"><span class="slot-time">${t.start}</span><span class="${cls}">${lbl}</span></div>`;
         }).join('');
-        return dateRow + timeRows;
+        return `<div class="day-col"><div class="day-head">${date.label}</div>${slotLines}</div>`;
       }).join('');
 
-      return `<div class="member-block">
-        <div class="member-name">${group.type === 'group' ? '👤 ' : ''}${m.name} ${updHtml}</div>
-        <div class="status-chips">
-          <span class="chip chip-yes">○ ${yes}枠</span>
-          <span class="chip chip-maybe">△ ${maybe}枠</span>
-          <span class="chip chip-no">✗ ${no}枠</span>
+      return `<div class="member-row">
+        <div class="member-head">
+          <div class="member-name">${group.type === 'group' ? m.name : ''}</div>
+          ${upd ? `<div class="updated-at">${upd} 更新</div>` : ''}
         </div>
-        <div class="grid-wrap">
-          <table class="gtable">
-            <thead><tr><th class="tc">時間帯</th><th>可否</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+        <div class="status-row">
+          <span class="status-chip chip-yes">○ ${yes}枠</span>
+          <span class="status-chip chip-maybe">△ ${maybe}枠</span>
+          <span class="status-chip chip-no">✗ ${no}枠</span>
         </div>
+        <div class="avail-grid">${dayColumns}</div>
       </div>`;
     }).join('');
 
-    card.innerHTML = `<div class="card-head"><h2>${group.name}</h2><span class="badge ${bClass}">${bText}</span>${codeHtml}</div>${membersHtml}`;
+    card.innerHTML = `
+      <div class="card-head">
+        <h2>${group.name}</h2>
+        ${typeHtml}${codeHtml}
+      </div>
+      ${membersHtml}`;
     list.appendChild(card);
   });
 }

@@ -3,155 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>グループの回答確認</title>
+<title>グループの回答一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --text: #18181b;
+    --muted: #71717a;
+    --yes: #16a34a; --yes-bg: #dcfce7;
+    --maybe: #d97706; --maybe-bg: #fef3c7;
+    --no: #dc2626; --no-bg: #fee2e2;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-  .container { max-width: 700px; margin: 0 auto; }
-  .header { background: white; border-radius: 16px; padding: 20px 22px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  .header h1 { font-size: 20px; font-weight: 800; color: #1a1a2e; }
-  .header .sub { font-size: 13px; color: #888; margin-top: 3px; }
-  .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .btn-refresh { background: #f3f4f6; border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: #555; cursor: pointer; white-space: nowrap; }
-  .btn-refresh:hover { background: #e5e7eb; }
-  .back-link { display: inline-block; margin-top: 10px; color: #6366f1; font-size: 13px; font-weight: 600; text-decoration: none; }
-  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #555; font-weight: 600; }
-  .lc { width: 24px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-  .lc-yes   { background: #22c55e; color: white; }
-  .lc-maybe { background: #f59e0b; color: white; }
-  .lc-no    { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; }
-  .lc-na    { background: #f3f4f6; color: #aaa; }
-  .lc-allok { background: #bbf7d0; color: #15803d; }
+  body { font-family: 'Inter','Noto Sans JP',sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
 
-  .card { background: white; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
-  .card-title { padding: 14px 18px; font-size: 15px; font-weight: 700; color: #1a1a2e; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  .topbar-left h1 { font-size: 15px; font-weight: 700; }
+  .topbar-left .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .btn-outline {
+    font-size: 12px; font-weight: 500; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px;
+    background: var(--surface); cursor: pointer; font-family: inherit;
+    text-decoration: none; transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .btn-outline:hover { color: var(--text); border-color: #a1a1aa; }
+
+  .legend {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 9px 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+  .ldot { width: 20px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+  .l-yes   { background: var(--yes-bg); color: var(--yes); }
+  .l-maybe { background: var(--maybe-bg); color: var(--maybe); }
+  .l-no    { background: var(--no-bg); color: var(--no); }
+  .l-na    { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-size: 9px; }
+  .allok-note { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+  .content { padding: 16px; max-width: 720px; margin: 0 auto; }
+
+  .day-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+  .day-title {
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .day-title strong { font-size: 15px; color: var(--text); }
   .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; }
-  th { padding: 7px 8px; font-size: 11px; color: #6b7280; font-weight: 600; text-align: center; background: #f9fafb; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
-  th.time-col { text-align: left; min-width: 80px; }
-  td { padding: 3px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; }
-  td.time-label { text-align: left; font-size: 12px; color: #4b5563; white-space: nowrap; padding-left: 8px; }
-  .cell { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 30px; border-radius: 5px; font-size: 14px; font-weight: 700; }
-  .c-yes   { background: #dcfce7; color: #16a34a; }
-  .c-maybe { background: #fef3c7; color: #d97706; }
-  .c-no    { background: #fef2f2; color: #ef4444; }
-  .c-na    { background: #f3f4f6; color: #d1d5db; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    padding: 8px 10px; font-size: 11px; font-weight: 600; color: var(--muted);
+    border-bottom: 1px solid var(--border); background: var(--bg);
+    text-align: center; white-space: nowrap;
+  }
+  thead th.tc { text-align: left; min-width: 90px; }
+  tbody td { padding: 5px 8px; border-bottom: 1px solid var(--bg); text-align: center; }
+  tbody td:last-child { border-right: none; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.tl { text-align: left; font-size: 12px; color: var(--muted); white-space: nowrap; padding-left: 16px; }
+  .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 26px; border-radius: 5px;
+    font-size: 13px; font-weight: 700;
+  }
+  .c-yes   { background: var(--yes-bg); color: var(--yes); }
+  .c-maybe { background: var(--maybe-bg); color: var(--maybe); }
+  .c-no    { background: var(--no-bg); color: var(--no); }
+  .c-na    { background: var(--bg); color: #d4d4d8; font-size: 11px; }
   .row-allok td { background: #f0fdf4; }
-  .no-response { font-size: 10px; color: #aaa; display: block; }
-  #loading { text-align: center; padding: 60px 20px; color: #888; }
+  .no-ans { display: block; font-size: 10px; color: #d4d4d8; margin-top: 1px; }
+
+  #loading { text-align: center; padding: 80px 20px; font-size: 14px; color: var(--muted); }
+  #errMsg  { text-align: center; padding: 80px 20px; font-size: 14px; color: var(--no); }
 </style>
 </head>
 <body>
-<div class="container">
-  <div id="loading">読み込み中...</div>
-  <div id="content" style="display:none">
-    <div class="header">
-      <div class="header-row">
-        <div>
-          <h1 id="groupTitle"></h1>
-          <div class="sub" id="memberCount"></div>
-        </div>
-        <button class="btn-refresh" onclick="loadData()">🔄 更新</button>
-      </div>
-      <a id="myFormLink" class="back-link" href="#">← 自分の回答フォームに戻る</a>
-      <div class="legend">
-        <div class="legend-item"><div class="lc lc-yes">○</div>参加できる</div>
-        <div class="legend-item"><div class="lc lc-maybe">△</div>たぶん大丈夫</div>
-        <div class="legend-item"><div class="lc lc-no">✗</div>参加できない</div>
-        <div class="legend-item"><div class="lc lc-na">—</div>未回答</div>
-        <div class="legend-item"><div class="lc lc-allok">全</div>全員○</div>
-      </div>
-    </div>
-    <div id="tableContainer"></div>
+<div class="topbar">
+  <div class="topbar-left">
+    <h1 id="groupTitle">グループの回答一覧</h1>
+    <div class="sub" id="memberSub"></div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-outline" onclick="loadData()">更新</button>
+    <a id="backLink" href="/" class="btn-outline">← 自分のフォームへ</a>
   </div>
 </div>
 
+<div class="legend">
+  <div class="legend-item"><div class="ldot l-yes">○</div>参加できる</div>
+  <div class="legend-item"><div class="ldot l-maybe">△</div>たぶん大丈夫</div>
+  <div class="legend-item"><div class="ldot l-no">✗</div>参加できない</div>
+  <div class="legend-item"><div class="ldot l-na">—</div>未回答</div>
+  <span class="allok-note">行が緑になっている時間帯は全員○</span>
+</div>
+
+<div id="loading">読み込み中</div>
+<div id="errMsg" style="display:none">グループが見つかりませんでした</div>
+<div class="content" id="content" style="display:none"></div>
+
 <script>
 const DATES = [
-  { key: '7/1', label: '7月1日（水）' },
-  { key: '7/2', label: '7月2日（木）' },
-  { key: '7/3', label: '7月3日（金）' }
+  { key:'7/1', label:'7月1日', dow:'水' },
+  { key:'7/2', label:'7月2日', dow:'木' },
+  { key:'7/3', label:'7月3日', dow:'金' },
 ];
 const TIMES = [];
-TIMES.push({ start: '12:30', end: '13:00' });
+TIMES.push({ start:'12:30', end:'13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m === 30 ? h + 1 : h, em = m === 30 ? 0 : 30;
-    TIMES.push({ start: s, end: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
+    const eh = m===30 ? h+1 : h, em = m===30 ? 0 : 30;
+    TIMES.push({ start:s, end:`${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
 
 const params = new URLSearchParams(location.search);
-const CODE = params.get('code');
+const CODE  = params.get('code');
 const TOKEN = params.get('token');
 
-function normalize(v) {
-  if (v === true || v === 'yes') return 'yes';
-  if (v === 'maybe') return 'maybe';
-  return 'no';
+function norm(v) {
+  if (v === true  || v === 'yes')   return 'yes';
+  if (v === 'maybe')                return 'maybe';
+  if (v === false || v === 'no')    return 'no';
+  return null;
 }
 
 async function loadData() {
-  if (!CODE) { document.getElementById('loading').textContent = 'コードが指定されていません'; return; }
-  const [groupRes, availRes] = await Promise.all([
+  if (!CODE) { showErr(); return; }
+  const [gRes, aRes] = await Promise.all([
     fetch(`/api/group/${CODE}`),
     fetch(`/api/group/${CODE}/availability`)
   ]);
-  if (!groupRes.ok) { document.getElementById('loading').textContent = 'グループが見つかりません'; return; }
-  const group = await groupRes.json();
-  const members = await availRes.json();
+  if (!gRes.ok) { showErr(); return; }
+  const group   = await gRes.json();
+  const members = await aRes.json();
 
-  document.getElementById('groupTitle').textContent = `🎵 ${group.name}`;
-  document.getElementById('memberCount').textContent = `メンバー ${members.length}人 • コード: ${CODE}`;
-  if (TOKEN) document.getElementById('myFormLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
+  document.getElementById('groupTitle').textContent = group.name;
+  document.getElementById('memberSub').textContent  = `${members.length}人 · コード: ${CODE}`;
+  if (TOKEN) document.getElementById('backLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
 
-  renderTables(members);
+  render(members);
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').style.display = 'block';
 }
 
-function renderTables(members) {
-  const container = document.getElementById('tableContainer');
-  container.innerHTML = '';
+function render(members) {
+  const content = document.getElementById('content');
+  content.innerHTML = '';
 
   DATES.forEach(date => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'day-card';
 
     const memberCols = members.map(m => {
       const hasData = Object.keys(m.slots).length > 0;
-      return `<th>${m.name}${hasData ? '' : '<span class="no-response">未回答</span>'}</th>`;
+      return `<th>${m.name}${hasData ? '' : '<span class="no-ans">未回答</span>'}</th>`;
     }).join('');
 
     const rows = TIMES.map(t => {
       const key = `${date.key}_${t.start}`;
       const answered = members.filter(m => Object.keys(m.slots).length > 0);
-      const allYes = answered.length > 0 && answered.every(m => normalize(m.slots[key]) === 'yes');
+      const allYes = answered.length > 0 && answered.every(m => norm(m.slots[key]) === 'yes');
 
       const cells = members.map(m => {
         const hasData = Object.keys(m.slots).length > 0;
-        if (!hasData) return `<td><span class="cell c-na">—</span></td>`;
-        const state = normalize(m.slots[key]);
-        const cls = state === 'yes' ? 'c-yes' : state === 'maybe' ? 'c-maybe' : 'c-no';
-        const lbl = state === 'yes' ? '○' : state === 'maybe' ? '△' : '✗';
-        return `<td><span class="cell ${cls}">${lbl}</span></td>`;
+        if (!hasData) return `<td><span class="chip c-na">—</span></td>`;
+        const state = norm(m.slots[key]);
+        if (!state || state === 'no') return `<td><span class="chip c-no">✗</span></td>`;
+        if (state === 'maybe')        return `<td><span class="chip c-maybe">△</span></td>`;
+        return `<td><span class="chip c-yes">○</span></td>`;
       }).join('');
 
-      return `<tr${allYes ? ' class="row-allok"' : ''}><td class="time-label">${t.start}〜${t.end}</td>${cells}</tr>`;
+      return `<tr${allYes ? ' class="row-allok"' : ''}><td class="tl">${t.start}〜${t.end}</td>${cells}</tr>`;
     }).join('');
 
     card.innerHTML = `
-      <div class="card-title">${date.label}</div>
+      <div class="day-title"><strong>${date.label}</strong>${date.dow}曜日</div>
       <div class="grid-wrap">
         <table>
-          <thead><tr><th class="time-col">時間帯</th>${memberCols}</tr></thead>
+          <thead><tr><th class="tc">時間帯</th>${memberCols}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
-    container.appendChild(card);
+    content.appendChild(card);
   });
+}
+
+function showErr() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('errMsg').style.display  = 'block';
 }
 
 loadData();

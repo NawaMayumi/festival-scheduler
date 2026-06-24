@@ -3,106 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>文化祭 打ち合わせ日程調整</title>
+<title>打ち合わせ日程調整</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --text: #18181b;
+    --muted: #71717a;
+    --accent: #18181b;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-  .card { background: white; border-radius: 24px; padding: 36px 28px; max-width: 440px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-  .logo { font-size: 36px; margin-bottom: 8px; }
-  h1 { font-size: 22px; font-weight: 800; color: #1a1a2e; }
-  .sub { font-size: 13px; color: #888; margin-bottom: 32px; margin-top: 4px; }
-  .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-  .choice-btn { border: 2.5px solid #e5e7eb; border-radius: 16px; padding: 20px 12px; text-align: center; cursor: pointer; transition: all 0.2s; background: white; }
-  .choice-btn:hover { border-color: #6366f1; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.15); }
-  .choice-btn.selected { border-color: #6366f1; background: #eef2ff; }
-  .choice-btn .icon { font-size: 32px; margin-bottom: 8px; }
-  .choice-btn .title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
-  .choice-btn .desc { font-size: 11px; color: #888; margin-top: 3px; }
-  .form-panel { display: none; }
-  .form-panel.active { display: block; }
-  .form-group { margin-bottom: 14px; }
-  label { font-size: 12px; font-weight: 700; color: #555; display: block; margin-bottom: 5px; }
-  input { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 15px; outline: none; transition: border-color 0.15s; }
-  input:focus { border-color: #6366f1; }
-  .btn-main { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
-  .btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(102,126,234,0.5); }
-  .btn-main:active { transform: translateY(0); }
-  .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: #ccc; font-size: 12px; }
-  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
-  .btn-sub { width: 100%; padding: 12px; background: #f3f4f6; color: #4b5563; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-  .btn-sub:hover { background: #e5e7eb; }
-  .error { color: #dc2626; font-size: 12px; margin-top: 6px; display: none; }
-  .group-badge { display: inline-flex; align-items: center; gap: 6px; background: #ede9fe; color: #7c3aed; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 8px; margin-bottom: 12px; }
-  .join-toggle { font-size: 13px; color: #6366f1; cursor: pointer; text-decoration: underline; display: block; text-align: center; margin-top: 10px; }
-  .admin-link { display: block; text-align: center; margin-top: 24px; font-size: 12px; color: #bbb; text-decoration: none; }
-  .admin-link:hover { color: #888; }
+  body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: var(--text);
+  }
+  .wrap { width: 100%; max-width: 400px; }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .subtitle { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .type-card {
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--surface);
+    user-select: none;
+  }
+  .type-card:hover { border-color: var(--text); }
+  .type-card.active { border-color: var(--text); background: #fafafa; }
+  .type-card .icon { font-size: 26px; margin-bottom: 8px; }
+  .type-card .name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .type-card .desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .panel { display: none; }
+  .panel.show { display: block; }
+
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; letter-spacing: 0.02em; }
+  .field input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: var(--text); }
+
+  .btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--text);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-top: 4px;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-ghost {
+    background: none;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    margin-top: 8px;
+  }
+  .btn-ghost:hover { opacity: 1; border-color: var(--text); color: var(--text); }
+
+  .divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--border-strong); font-size: 12px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .err { font-size: 12px; color: #dc2626; margin-top: 6px; display: none; }
+  .join-link { display: block; text-align: center; font-size: 13px; color: var(--muted); cursor: pointer; margin-top: 10px; text-decoration: underline; text-underline-offset: 2px; }
+  .join-link:hover { color: var(--text); }
+
+  .admin-link {
+    display: block;
+    text-align: center;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--border-strong);
+    text-decoration: none;
+  }
+  .admin-link:hover { color: var(--muted); }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">🎭</div>
-  <h1>打ち合わせ日程フォーム</h1>
-  <p class="sub">文化祭ステージ実行委員会 • 7/1〜7/3</p>
+<div class="wrap">
+  <div class="eyebrow">文化祭ステージ実行委員会</div>
+  <h1>打ち合わせ<br>候補日程フォーム</h1>
+  <p class="subtitle">7月1日・2日・3日の空き時間を教えてください</p>
 
-  <div class="choice-grid">
-    <div class="choice-btn" id="btn-solo" onclick="selectType('solo')">
+  <div class="type-grid">
+    <div class="type-card" id="card-solo" onclick="selectType('solo')">
       <div class="icon">🎤</div>
-      <div class="title">個人出演</div>
-      <div class="desc">ソロ・個人で参加</div>
+      <div class="name">個人出演</div>
+      <div class="desc">ソロ・個人</div>
     </div>
-    <div class="choice-btn" id="btn-group" onclick="selectType('group')">
+    <div class="type-card" id="card-group" onclick="selectType('group')">
       <div class="icon">🎸</div>
-      <div class="title">グループ出演</div>
-      <div class="desc">バンド・グループで参加</div>
+      <div class="name">グループ出演</div>
+      <div class="desc">バンド・グループ</div>
     </div>
   </div>
 
-  <!-- ソロパネル -->
-  <div class="form-panel" id="panel-solo">
-    <div class="form-group">
+  <!-- ソロ -->
+  <div class="panel" id="panel-solo">
+    <div class="field">
+      <label>名前</label>
+      <input id="soloName" type="text" placeholder="例：山田太郎" maxlength="30">
+    </div>
+    <button class="btn" onclick="registerSolo()">フォームへ進む</button>
+    <div class="err" id="soloErr"></div>
+  </div>
+
+  <!-- グループ作成 -->
+  <div class="panel" id="panel-create">
+    <div class="field">
+      <label>グループ名</label>
+      <input id="groupName" type="text" placeholder="例：ロックバンドA" maxlength="30">
+    </div>
+    <div class="field">
       <label>あなたの名前</label>
-      <input type="text" id="soloName" placeholder="例：山田太郎" maxlength="30">
+      <input id="groupMember" type="text" placeholder="例：田中花子" maxlength="30">
     </div>
-    <button class="btn-main" onclick="registerSolo()">日程フォームへ進む →</button>
-    <div class="error" id="soloError"></div>
+    <button class="btn" onclick="createGroup()">グループを作ってフォームへ</button>
+    <div class="err" id="createErr"></div>
+    <div class="divider">または</div>
+    <button class="btn btn-ghost" onclick="switchSub('join')">グループコードで参加する</button>
   </div>
 
-  <!-- グループパネル -->
-  <div class="form-panel" id="panel-group">
-    <!-- グループ作成 -->
-    <div id="sub-create">
-      <div class="form-group">
-        <label>グループ名</label>
-        <input type="text" id="groupName" placeholder="例：ロックバンドA" maxlength="30">
-      </div>
-      <div class="form-group">
-        <label>あなたの名前</label>
-        <input type="text" id="groupMemberName" placeholder="例：田中花子" maxlength="30">
-      </div>
-      <button class="btn-main" onclick="createGroup()">グループを作って進む →</button>
-      <div class="error" id="createError"></div>
-      <div class="divider">または</div>
-      <button class="btn-sub" onclick="switchSub('join')">📎 すでにグループがある → コードで参加</button>
+  <!-- グループ参加 -->
+  <div class="panel" id="panel-join">
+    <div class="field">
+      <label>グループコード</label>
+      <input id="joinCode" type="text" placeholder="代表者から受け取ったコード" maxlength="6" style="text-transform:uppercase;letter-spacing:3px;font-weight:600">
     </div>
-
-    <!-- グループ参加 -->
-    <div id="sub-join" style="display:none">
-      <div class="group-badge">📎 グループコードで合流</div>
-      <div class="form-group">
-        <label>グループコード（代表者から受け取ったもの）</label>
-        <input type="text" id="joinCode" placeholder="例：AB3XY" maxlength="6" style="text-transform:uppercase;letter-spacing:2px;font-weight:700">
-      </div>
-      <div class="form-group">
-        <label>あなたの名前</label>
-        <input type="text" id="joinName" placeholder="例：鈴木次郎" maxlength="30">
-      </div>
-      <button class="btn-main" onclick="joinGroup()">参加して進む →</button>
-      <div class="error" id="joinError"></div>
-      <span class="join-toggle" onclick="switchSub('create')">← グループを新しく作る</span>
+    <div class="field">
+      <label>あなたの名前</label>
+      <input id="joinName" type="text" placeholder="例：鈴木次郎" maxlength="30">
     </div>
+    <button class="btn" onclick="joinGroup()">参加してフォームへ</button>
+    <div class="err" id="joinErr"></div>
+    <span class="join-link" onclick="switchSub('create')">← グループを新しく作る</span>
   </div>
 
-  <a href="/admin.html" class="admin-link">管理者ページ</a>
+  <a href="/admin.html" class="admin-link">管理者ページ →</a>
 </div>
 
 <script>
@@ -110,15 +195,14 @@ let currentType = null;
 
 function selectType(type) {
   currentType = type;
-  document.getElementById('btn-solo').classList.toggle('selected', type === 'solo');
-  document.getElementById('btn-group').classList.toggle('selected', type === 'group');
-  document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + type).classList.add('active');
+  ['solo','group'].forEach(t => document.getElementById('card-' + t).classList.toggle('active', t === type));
+  ['solo','create','join'].forEach(p => document.getElementById('panel-' + p).classList.remove('show'));
+  document.getElementById(type === 'solo' ? 'panel-solo' : 'panel-create').classList.add('show');
 }
 
 function switchSub(sub) {
-  document.getElementById('sub-create').style.display = sub === 'create' ? 'block' : 'none';
-  document.getElementById('sub-join').style.display = sub === 'join' ? 'block' : 'none';
+  ['create','join'].forEach(p => document.getElementById('panel-' + p).classList.remove('show'));
+  document.getElementById('panel-' + sub).classList.add('show');
 }
 
 function showErr(id, msg) {
@@ -129,46 +213,34 @@ function showErr(id, msg) {
 
 async function registerSolo() {
   const name = document.getElementById('soloName').value.trim();
-  if (!name) { showErr('soloError', '名前を入力してください'); return; }
-  document.getElementById('soloError').style.display = 'none';
-
-  const res = await fetch('/api/register/solo', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ name })
-  });
-  const data = await res.json();
-  if (!res.ok) { showErr('soloError', data.error); return; }
-  location.href = `/form.html?token=${data.token}`;
+  if (!name) { showErr('soloErr', '名前を入力してください'); return; }
+  document.getElementById('soloErr').style.display = 'none';
+  const res = await fetch('/api/register/solo', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+  const d = await res.json();
+  if (!res.ok) { showErr('soloErr', d.error); return; }
+  location.href = `/form.html?token=${d.token}`;
 }
 
 async function createGroup() {
   const groupName = document.getElementById('groupName').value.trim();
-  const memberName = document.getElementById('groupMemberName').value.trim();
-  if (!groupName || !memberName) { showErr('createError', 'グループ名と名前を入力してください'); return; }
-  document.getElementById('createError').style.display = 'none';
-
-  const res = await fetch('/api/register/group', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ groupName, memberName })
-  });
-  const data = await res.json();
-  if (!res.ok) { showErr('createError', data.error); return; }
-  location.href = `/form.html?token=${data.token}&code=${data.groupCode}`;
+  const memberName = document.getElementById('groupMember').value.trim();
+  if (!groupName || !memberName) { showErr('createErr', 'グループ名と名前を入力してください'); return; }
+  document.getElementById('createErr').style.display = 'none';
+  const res = await fetch('/api/register/group', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({groupName, memberName}) });
+  const d = await res.json();
+  if (!res.ok) { showErr('createErr', d.error); return; }
+  location.href = `/form.html?token=${d.token}&code=${d.groupCode}`;
 }
 
 async function joinGroup() {
   const code = document.getElementById('joinCode').value.trim().toUpperCase();
   const name = document.getElementById('joinName').value.trim();
-  if (!code || !name) { showErr('joinError', 'コードと名前を入力してください'); return; }
-  document.getElementById('joinError').style.display = 'none';
-
-  const res = await fetch(`/api/join/${code}`, {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ name })
-  });
-  const data = await res.json();
-  if (!res.ok) { showErr('joinError', data.error); return; }
-  location.href = `/form.html?token=${data.token}&code=${data.groupCode}`;
+  if (!code || !name) { showErr('joinErr', 'コードと名前を入力してください'); return; }
+  document.getElementById('joinErr').style.display = 'none';
+  const res = await fetch(`/api/join/${code}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name}) });
+  const d = await res.json();
+  if (!res.ok) { showErr('joinErr', d.error); return; }
+  location.href = `/form.html?token=${d.token}&code=${d.groupCode}`;
 }
 </script>
 </body>
