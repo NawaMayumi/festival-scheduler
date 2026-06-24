@@ -56,11 +56,14 @@
   .state-yes   { background: #22c55e; border-color: #16a34a; color: white; box-shadow: 0 2px 8px rgba(34,197,94,0.3); }
   .state-maybe { background: #f59e0b; border-color: #d97706; color: white; box-shadow: 0 2px 8px rgba(245,158,11,0.3); }
   .state-no    { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
+  .state-empty { background: white; border-color: #e5e7eb; color: transparent; }
 
   .slot-cell.dragging-over { transform: scale(1.08); }
 
-  .break-row td { height: 8px; }
-  .break-line { border: none; border-top: 2px dashed #e5e7eb; margin: 2px 3px; display: block; }
+  .section-header td { padding: 10px 3px 4px; }
+  .section-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 6px; }
+  .section-label.lunch { background: #fef9c3; color: #a16207; }
+  .section-label.evening { background: #ede9fe; color: #6d28d9; }
 
   .submit-area { position: sticky; bottom: 0; background: white; border-top: 1px solid #e5e7eb; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
   .submit-counts { flex: 1; display: flex; gap: 10px; font-size: 13px; font-weight: 700; }
@@ -120,7 +123,8 @@
     <div class="legend-item"><div class="lc lc-yes">○</div>参加できる</div>
     <div class="legend-item"><div class="lc lc-maybe">△</div>たぶん大丈夫</div>
     <div class="legend-item"><div class="lc lc-no">✗</div>参加できない</div>
-    <span class="hint-drag">長押し＋ドラッグで一括入力</span>
+    <div class="legend-item"><div class="lc" style="background:white;border:1.5px solid #e5e7eb;"></div>未選択</div>
+    <span class="hint-drag">ドラッグで一括入力</span>
   </div>
 
   <div class="calendar-wrap">
@@ -166,11 +170,11 @@ const TOKEN = params.get('token');
 const GROUP_CODE = params.get('code');
 let slots = {};
 
-// 状態サイクル: no → yes → maybe → no
-const NEXT = { no: 'yes', yes: 'maybe', maybe: 'no' };
-const LABELS = { yes: '○', maybe: '△', no: '✗' };
+// 状態サイクル: empty → yes → maybe → no → empty
+const NEXT = { empty: 'yes', yes: 'maybe', maybe: 'no', no: 'empty' };
+const LABELS = { yes: '○', maybe: '△', no: '✗', empty: '' };
 
-function getState(key) { return slots[key] || 'no'; }
+function getState(key) { return slots[key] || 'empty'; }
 
 function applyToCell(el, key, state) {
   slots[key] = state;
@@ -180,11 +184,9 @@ function applyToCell(el, key, state) {
 }
 
 function updateCounts() {
-  const vals = Object.values(slots);
-  const total = TIMES.length * DATES.length;
-  const yes = vals.filter(v => v === 'yes').length;
-  const maybe = vals.filter(v => v === 'maybe').length;
-  const no = total - yes - maybe;
+  const yes   = Object.values(slots).filter(v => v === 'yes').length;
+  const maybe = Object.values(slots).filter(v => v === 'maybe').length;
+  const no    = Object.values(slots).filter(v => v === 'no').length;
   document.getElementById('cntYes').textContent = yes;
   document.getElementById('cntMaybe').textContent = maybe;
   document.getElementById('cntNo').textContent = no;
@@ -211,12 +213,19 @@ function buildGrid() {
   const tbody = document.getElementById('calBody');
   tbody.innerHTML = '';
 
+  // 昼ヘッダー
+  const lunchHdr = document.createElement('tr');
+  lunchHdr.className = 'section-header';
+  lunchHdr.innerHTML = `<td colspan="4"><div class="section-label lunch">☀️ 昼の部</div></td>`;
+  tbody.appendChild(lunchHdr);
+
   TIMES.forEach((time, i) => {
+    // 夜ヘッダー（12:30の次 = i===1）
     if (i === 1) {
-      const br = document.createElement('tr');
-      br.className = 'break-row';
-      br.innerHTML = `<td colspan="4"><div class="break-line"></div></td>`;
-      tbody.appendChild(br);
+      const nightHdr = document.createElement('tr');
+      nightHdr.className = 'section-header';
+      nightHdr.innerHTML = `<td colspan="4"><div class="section-label evening">🌙 夜の部</div></td>`;
+      tbody.appendChild(nightHdr);
     }
 
     const tr = document.createElement('tr');
