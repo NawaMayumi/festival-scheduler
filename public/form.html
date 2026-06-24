@@ -6,93 +6,89 @@
 <title>打ち合わせ日程フォーム</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; user-select: none; -webkit-user-select: none; }
 
-  /* ヘッダー */
   .topbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
   .topbar-left { display: flex; align-items: center; gap: 10px; }
   .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; flex-shrink: 0; }
   .user-info h2 { font-size: 15px; font-weight: 700; color: #1a1a2e; }
   .user-info .group-tag { font-size: 11px; color: #7c3aed; font-weight: 600; }
-  .btn-gcal { display: flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: #4285f4; cursor: pointer; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+  .btn-gcal { display: flex; align-items: center; gap: 5px; background: white; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 7px 11px; font-size: 12px; font-weight: 600; color: #4285f4; cursor: pointer; text-decoration: none; white-space: nowrap; }
   .btn-gcal:hover { background: #f0f7ff; border-color: #4285f4; }
-  .btn-gcal .gcal-icon { font-size: 16px; }
 
-  /* グループコードバナー */
   .code-banner { background: linear-gradient(135deg, #ede9fe, #ddd6fe); border-bottom: 1px solid #c4b5fd; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; }
   .code-banner .label { font-size: 12px; color: #6d28d9; font-weight: 600; }
   .code-banner .code { font-size: 20px; font-weight: 800; color: #4c1d95; letter-spacing: 3px; font-family: monospace; }
   .code-banner .share-hint { font-size: 11px; color: #7c3aed; }
   .btn-group-view { background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
-  .btn-group-view:hover { background: #6d28d9; }
 
-  /* 凡例 */
-  .legend { padding: 10px 20px; background: white; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 16px; font-size: 12px; color: #666; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .legend-cell { width: 28px; height: 20px; border-radius: 4px; }
-  .legend-cell.available { background: #22c55e; }
-  .legend-cell.empty { background: white; border: 1.5px solid #e5e7eb; }
-  .hint { font-size: 11px; color: #aaa; margin-left: auto; }
+  .legend { padding: 10px 20px; background: white; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 14px; font-size: 12px; color: #555; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-weight: 600; }
+  .lc { width: 26px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+  .lc-yes  { background: #22c55e; color: white; }
+  .lc-maybe { background: #f59e0b; color: white; }
+  .lc-no   { background: #fecaca; color: #dc2626; }
+  .hint-drag { font-size: 11px; color: #aaa; margin-left: auto; }
 
-  /* カレンダーグリッド */
-  .calendar-wrap { padding: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .calendar { min-width: 320px; width: 100%; border-collapse: separate; border-spacing: 0; }
+  .calendar-wrap { padding: 14px 14px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .calendar { min-width: 300px; width: 100%; border-collapse: separate; border-spacing: 0; }
 
-  /* ヘッダー行 */
   .calendar thead th { padding: 0; text-align: center; }
-  .calendar thead th.corner { width: 72px; min-width: 72px; }
-  .day-header { background: white; border-radius: 12px 12px 0 0; padding: 10px 8px 8px; margin: 0 3px; display: block; }
-  .day-name { font-size: 11px; font-weight: 600; color: #888; }
+  .calendar thead th.corner { width: 64px; min-width: 64px; }
+  .day-header { background: white; border-radius: 12px 12px 0 0; padding: 10px 6px 8px; margin: 0 3px; display: block; }
+  .day-name { font-size: 10px; font-weight: 600; color: #aaa; }
   .day-date { font-size: 22px; font-weight: 800; color: #1a1a2e; line-height: 1; margin: 2px 0; }
-  .day-dow { font-size: 11px; font-weight: 600; }
-  .day-dow.wed { color: #3b82f6; }
-  .day-dow.thu { color: #8b5cf6; }
-  .day-dow.fri { color: #ef4444; }
+  .day-dow { font-size: 11px; font-weight: 700; }
+  .wed { color: #3b82f6; } .thu { color: #8b5cf6; } .fri { color: #ef4444; }
 
-  /* セル */
   .calendar tbody tr td { padding: 2px 3px; }
-  .calendar tbody tr td.time-col { padding: 2px 8px 2px 0; text-align: right; white-space: nowrap; vertical-align: middle; }
-  .time-label { font-size: 11px; color: #9ca3af; font-weight: 500; }
+  .calendar tbody tr td.time-col { padding: 2px 6px 2px 0; text-align: right; vertical-align: middle; }
+  .time-label { font-size: 11px; color: #9ca3af; font-weight: 500; white-space: nowrap; }
 
-  .slot-cell { width: 100%; height: 44px; border-radius: 6px; border: 1.5px solid #e5e7eb; background: white; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; user-select: none; -webkit-user-select: none; }
-  .slot-cell:hover { border-color: #86efac; background: #f0fdf4; transform: scale(1.04); }
-  .slot-cell.available { background: #22c55e; border-color: #16a34a; color: white; box-shadow: 0 2px 8px rgba(34,197,94,0.35); }
-  .slot-cell.available:hover { background: #16a34a; transform: scale(1.04); }
+  .slot-cell {
+    width: 100%; height: 46px; border-radius: 7px; border: 1.5px solid #e5e7eb;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; transition: transform 0.08s, box-shadow 0.08s;
+    touch-action: none;
+  }
+  .slot-cell:active { transform: scale(0.95); }
 
-  /* セクション区切り（12:30 と 15:00 の間） */
-  .break-row td { height: 10px; }
-  .break-line { border: none; border-top: 2px dashed #e5e7eb; margin: 4px 3px; display: block; }
+  .state-yes   { background: #22c55e; border-color: #16a34a; color: white; box-shadow: 0 2px 8px rgba(34,197,94,0.3); }
+  .state-maybe { background: #f59e0b; border-color: #d97706; color: white; box-shadow: 0 2px 8px rgba(245,158,11,0.3); }
+  .state-no    { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
 
-  /* 送信エリア */
-  .submit-area { position: sticky; bottom: 0; background: white; border-top: 1px solid #e5e7eb; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
-  .submit-count { font-size: 12px; color: #888; }
-  .submit-count strong { color: #22c55e; font-size: 16px; }
-  .btn-submit { flex: 1; padding: 13px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
-  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34,197,94,0.4); }
-  .btn-submit:disabled { background: #d1d5db; box-shadow: none; transform: none; color: #9ca3af; cursor: not-allowed; }
+  .slot-cell.dragging-over { transform: scale(1.08); }
 
-  /* トースト */
+  .break-row td { height: 8px; }
+  .break-line { border: none; border-top: 2px dashed #e5e7eb; margin: 2px 3px; display: block; }
+
+  .submit-area { position: sticky; bottom: 0; background: white; border-top: 1px solid #e5e7eb; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .submit-counts { flex: 1; display: flex; gap: 10px; font-size: 13px; font-weight: 700; }
+  .cnt-yes   { color: #16a34a; }
+  .cnt-maybe { color: #d97706; }
+  .cnt-no    { color: #ef4444; }
+  .btn-submit { padding: 12px 22px; background: linear-gradient(135deg, #22c55e, #16a34a); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(34,197,94,0.3); white-space: nowrap; }
+  .btn-submit:hover { transform: translateY(-1px); }
+  .btn-submit:disabled { background: #d1d5db; box-shadow: none; transform: none; cursor: not-allowed; }
+
   .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 100px; font-size: 14px; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap; z-index: 100; }
   .toast.success { background: #1a1a2e; color: white; }
-  .toast.error { background: #dc2626; color: white; }
+  .toast.error-t { background: #dc2626; color: white; }
   .toast.show { opacity: 1; }
 
-  /* エラー */
   .error-page { text-align: center; padding: 80px 20px; }
   .error-page h2 { font-size: 20px; color: #dc2626; margin-bottom: 10px; }
-  .error-page p { color: #888; margin-bottom: 20px; }
-  .back-btn { display: inline-block; padding: 12px 24px; background: #6366f1; color: white; border-radius: 10px; text-decoration: none; font-weight: 700; }
+  .back-btn { display: inline-block; margin-top: 16px; padding: 12px 24px; background: #6366f1; color: white; border-radius: 10px; text-decoration: none; font-weight: 700; }
 
-  @media (max-width: 400px) {
-    .slot-cell { height: 38px; }
-    .calendar-wrap { padding: 8px; }
-    .day-date { font-size: 18px; }
+  @media (max-width: 380px) {
+    .slot-cell { height: 40px; font-size: 17px; }
+    .calendar-wrap { padding: 10px 6px 0; }
   }
 </style>
 </head>
 <body>
 
-<div id="loading" style="text-align:center;padding:80px 20px;color:#888;font-size:15px;">読み込み中...</div>
+<div id="loading" style="text-align:center;padding:80px 20px;color:#888;">読み込み中...</div>
 <div id="errorPage" class="error-page" style="display:none">
   <h2>リンクが無効です</h2>
   <p>URLが正しくないか、有効期限が切れています。</p>
@@ -100,7 +96,6 @@
 </div>
 
 <div id="app" style="display:none">
-  <!-- ヘッダー -->
   <div class="topbar">
     <div class="topbar-left">
       <div class="user-avatar" id="avatarChar"></div>
@@ -109,84 +104,59 @@
         <div class="group-tag" id="groupTag"></div>
       </div>
     </div>
-    <a href="https://calendar.google.com" target="_blank" class="btn-gcal">
-      <span class="gcal-icon">📅</span> Googleカレンダー
-    </a>
+    <a href="https://calendar.google.com" target="_blank" class="btn-gcal">📅 Googleカレンダー</a>
   </div>
 
-  <!-- グループコードバナー（グループのみ表示） -->
   <div class="code-banner" id="codeBanner" style="display:none">
     <div>
-      <div class="label">グループコード（他メンバーに共有）</div>
+      <div class="label">グループコード（メンバーに共有）</div>
       <div class="code" id="groupCode"></div>
-      <div class="share-hint">このコードをメンバー全員に送ってください</div>
+      <div class="share-hint">このコードで他メンバーが参加できます</div>
     </div>
     <a id="groupViewBtn" class="btn-group-view" href="#">👥 全員の回答を見る</a>
   </div>
 
-  <!-- 凡例 -->
   <div class="legend">
-    <div class="legend-item"><div class="legend-cell available"></div>参加できる</div>
-    <div class="legend-item"><div class="legend-cell empty"></div>参加できない / 未選択</div>
-    <span class="hint">セルをタップして切り替え</span>
+    <div class="legend-item"><div class="lc lc-yes">○</div>参加できる</div>
+    <div class="legend-item"><div class="lc lc-maybe">△</div>たぶん大丈夫</div>
+    <div class="legend-item"><div class="lc lc-no">✗</div>参加できない</div>
+    <span class="hint-drag">長押し＋ドラッグで一括入力</span>
   </div>
 
-  <!-- カレンダーグリッド -->
   <div class="calendar-wrap">
     <table class="calendar">
       <thead>
         <tr>
           <th class="corner"></th>
-          <th>
-            <div class="day-header">
-              <div class="day-name">7月</div>
-              <div class="day-date">1</div>
-              <div class="day-dow wed">水</div>
-            </div>
-          </th>
-          <th>
-            <div class="day-header">
-              <div class="day-name">7月</div>
-              <div class="day-date">2</div>
-              <div class="day-dow thu">木</div>
-            </div>
-          </th>
-          <th>
-            <div class="day-header">
-              <div class="day-name">7月</div>
-              <div class="day-date">3</div>
-              <div class="day-dow fri">金</div>
-            </div>
-          </th>
+          <th><div class="day-header"><div class="day-name">7月</div><div class="day-date">1</div><div class="day-dow wed">水</div></div></th>
+          <th><div class="day-header"><div class="day-name">7月</div><div class="day-date">2</div><div class="day-dow thu">木</div></div></th>
+          <th><div class="day-header"><div class="day-name">7月</div><div class="day-date">3</div><div class="day-dow fri">金</div></div></th>
         </tr>
       </thead>
       <tbody id="calBody"></tbody>
     </table>
   </div>
 
-  <!-- 送信 -->
   <div class="submit-area">
-    <div class="submit-count">参加可能: <strong id="countNum">0</strong> 枠</div>
-    <button class="btn-submit" id="submitBtn" onclick="save()">回答を保存する</button>
+    <div class="submit-counts">
+      <span class="cnt-yes">○ <span id="cntYes">0</span></span>
+      <span class="cnt-maybe">△ <span id="cntMaybe">0</span></span>
+      <span class="cnt-no">✗ <span id="cntNo">0</span></span>
+    </div>
+    <button class="btn-submit" id="submitBtn" onclick="save()">保存する</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const DATES = [
-  { key: '7/1', col: 0 },
-  { key: '7/2', col: 1 },
-  { key: '7/3', col: 2 }
-];
-
+const DATES = ['7/1', '7/2', '7/3'];
 const TIMES = [];
 TIMES.push({ start: '12:30', end: '13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m === 30 ? h + 1 : h;
-    const em = m === 30 ? 0 : 30;
+    const eh = m === 30 ? h + 1 : h, em = m === 30 ? 0 : 30;
     TIMES.push({ start: s, end: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
@@ -196,27 +166,52 @@ const TOKEN = params.get('token');
 const GROUP_CODE = params.get('code');
 let slots = {};
 
-function slotKey(dateKey, timeStart) { return `${dateKey}_${timeStart}`; }
+// 状態サイクル: no → yes → maybe → no
+const NEXT = { no: 'yes', yes: 'maybe', maybe: 'no' };
+const LABELS = { yes: '○', maybe: '△', no: '✗' };
 
-function updateCount() {
-  const n = Object.values(slots).filter(Boolean).length;
-  document.getElementById('countNum').textContent = n;
+function getState(key) { return slots[key] || 'no'; }
+
+function applyToCell(el, key, state) {
+  slots[key] = state;
+  el.className = `slot-cell state-${state}`;
+  el.textContent = LABELS[state];
+  updateCounts();
 }
 
-function toggleCell(dateKey, timeStart, el) {
-  const key = slotKey(dateKey, timeStart);
-  slots[key] = !slots[key];
-  el.classList.toggle('available', !!slots[key]);
-  el.textContent = slots[key] ? '○' : '';
-  updateCount();
+function updateCounts() {
+  const vals = Object.values(slots);
+  const total = TIMES.length * DATES.length;
+  const yes = vals.filter(v => v === 'yes').length;
+  const maybe = vals.filter(v => v === 'maybe').length;
+  const no = total - yes - maybe;
+  document.getElementById('cntYes').textContent = yes;
+  document.getElementById('cntMaybe').textContent = maybe;
+  document.getElementById('cntNo').textContent = no;
 }
+
+// ドラッグ管理
+let isDragging = false;
+let dragTargetState = null;
+
+function startDrag(el, key) {
+  isDragging = true;
+  dragTargetState = NEXT[getState(key)];
+  applyToCell(el, key, dragTargetState);
+}
+
+function onEnterCell(el, key) {
+  if (!isDragging) return;
+  applyToCell(el, key, dragTargetState);
+}
+
+function endDrag() { isDragging = false; dragTargetState = null; }
 
 function buildGrid() {
   const tbody = document.getElementById('calBody');
   tbody.innerHTML = '';
 
   TIMES.forEach((time, i) => {
-    // 12:30 の後に区切り線
     if (i === 1) {
       const br = document.createElement('tr');
       br.className = 'break-row';
@@ -225,27 +220,54 @@ function buildGrid() {
     }
 
     const tr = document.createElement('tr');
-    const tdTime = document.createElement('td');
-    tdTime.className = 'time-col';
-    tdTime.innerHTML = `<span class="time-label">${time.start}</span>`;
-    tr.appendChild(tdTime);
+    const tdT = document.createElement('td');
+    tdT.className = 'time-col';
+    tdT.innerHTML = `<span class="time-label">${time.start}</span>`;
+    tr.appendChild(tdT);
 
     DATES.forEach(date => {
-      const key = slotKey(date.key, time.start);
-      const isAvail = !!slots[key];
+      const key = `${date}_${time.start}`;
+      const state = getState(key);
       const td = document.createElement('td');
       const cell = document.createElement('div');
-      cell.className = 'slot-cell' + (isAvail ? ' available' : '');
-      cell.textContent = isAvail ? '○' : '';
-      cell.onclick = () => toggleCell(date.key, time.start, cell);
+      cell.className = `slot-cell state-${state}`;
+      cell.textContent = LABELS[state];
+      cell.dataset.key = key;
+
+      // マウス
+      cell.addEventListener('mousedown', e => { e.preventDefault(); startDrag(cell, key); });
+      cell.addEventListener('mouseenter', () => onEnterCell(cell, key));
+
+      // タッチ
+      cell.addEventListener('touchstart', e => {
+        e.preventDefault();
+        startDrag(cell, key);
+      }, { passive: false });
+
       td.appendChild(cell);
       tr.appendChild(td);
     });
 
     tbody.appendChild(tr);
   });
-  updateCount();
+
+  updateCounts();
 }
+
+// タッチドラッグ: 指の移動先のセルを探す
+document.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  const el = document.elementFromPoint(touch.clientX, touch.clientY);
+  const cell = el?.closest('.slot-cell');
+  if (cell && cell.dataset.key) {
+    onEnterCell(cell, cell.dataset.key);
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', endDrag);
+document.addEventListener('mouseup', endDrag);
 
 async function save() {
   const btn = document.getElementById('submitBtn');
@@ -259,13 +281,9 @@ async function save() {
   });
 
   btn.disabled = false;
-  btn.textContent = '回答を保存する';
-
-  if (res.ok) {
-    toast('✅ 回答を保存しました！', 'success');
-  } else {
-    toast('❌ エラーが発生しました', 'error');
-  }
+  btn.textContent = '保存する';
+  if (res.ok) toast('✅ 回答を保存しました！', 'success');
+  else toast('❌ エラーが発生しました', 'error-t');
 }
 
 function toast(msg, type) {
@@ -282,11 +300,9 @@ async function init() {
     fetch(`/api/me/${TOKEN}`),
     fetch(`/api/availability/${TOKEN}`)
   ]);
-
   if (!meRes.ok) { showError(); return; }
-  const me = await meRes.json();
 
-  // ヘッダー設定
+  const me = await meRes.json();
   document.getElementById('avatarChar').textContent = me.name[0];
   document.getElementById('displayName').textContent = me.name + ' さん';
 
@@ -298,10 +314,15 @@ async function init() {
     document.getElementById('groupViewBtn').href = `/group.html?code=${code}&token=${TOKEN}`;
   }
 
-  // 既存の回答を読み込む
   if (availRes.ok) {
     const avail = await availRes.json();
-    slots = avail.slots || {};
+    // 旧データ(true/false)を新形式に変換
+    const raw = avail.slots || {};
+    Object.entries(raw).forEach(([k, v]) => {
+      if (v === true) slots[k] = 'yes';
+      else if (v === false || v === 'no') slots[k] = 'no';
+      else slots[k] = v;
+    });
   }
 
   buildGrid();

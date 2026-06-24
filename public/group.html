@@ -6,34 +6,40 @@
 <title>グループの回答確認</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
   .container { max-width: 700px; margin: 0 auto; }
-  .header { background: white; border-radius: 16px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  .header h1 { font-size: 20px; font-weight: 700; color: #1a1a2e; }
-  .header .sub { font-size: 13px; color: #888; margin-top: 4px; }
-  .back-link { display: inline-block; margin-top: 12px; color: #4f46e5; font-size: 13px; font-weight: 600; text-decoration: none; }
-  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555; }
-  .legend-dot { width: 16px; height: 16px; border-radius: 4px; }
+  .header { background: white; border-radius: 16px; padding: 20px 22px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .header h1 { font-size: 20px; font-weight: 800; color: #1a1a2e; }
+  .header .sub { font-size: 13px; color: #888; margin-top: 3px; }
+  .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .btn-refresh { background: #f3f4f6; border: none; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; color: #555; cursor: pointer; white-space: nowrap; }
+  .btn-refresh:hover { background: #e5e7eb; }
+  .back-link { display: inline-block; margin-top: 10px; color: #6366f1; font-size: 13px; font-weight: 600; text-decoration: none; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #555; font-weight: 600; }
+  .lc { width: 24px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+  .lc-yes   { background: #22c55e; color: white; }
+  .lc-maybe { background: #f59e0b; color: white; }
+  .lc-no    { background: #fef2f2; color: #ef4444; border: 1px solid #fca5a5; }
+  .lc-na    { background: #f3f4f6; color: #aaa; }
+  .lc-allok { background: #bbf7d0; color: #15803d; }
+
   .card { background: white; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); overflow: hidden; }
-  .card-title { padding: 16px 20px; font-size: 16px; font-weight: 700; color: #1a1a2e; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
+  .card-title { padding: 14px 18px; font-size: 15px; font-weight: 700; color: #1a1a2e; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
   .grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { width: 100%; border-collapse: collapse; min-width: 420px; }
-  th { padding: 8px 10px; font-size: 11px; color: #6b7280; font-weight: 600; text-align: center; background: #f9fafb; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
-  th.time-col { text-align: left; min-width: 90px; }
-  td { padding: 7px 10px; border-bottom: 1px solid #f9f9f9; text-align: center; vertical-align: middle; }
-  td.time-label { text-align: left; font-size: 13px; color: #4b5563; white-space: nowrap; }
-  .cell-ok { background: #dcfce7; border-radius: 4px; color: #15803d; font-weight: 700; font-size: 13px; }
-  .cell-ng { background: #fee2e2; border-radius: 4px; color: #b91c1c; font-size: 12px; }
-  .cell-na { background: #f3f4f6; border-radius: 4px; color: #9ca3af; font-size: 11px; }
-  .all-ok { background: #bbf7d0 !important; }
-  .date-group { background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: 700; text-align: left; padding: 8px 10px; }
-  .refresh-btn { float: right; background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 10px; font-size: 12px; color: #6b7280; cursor: pointer; }
-  .refresh-btn:hover { border-color: #4f46e5; color: #4f46e5; }
+  table { width: 100%; border-collapse: collapse; }
+  th { padding: 7px 8px; font-size: 11px; color: #6b7280; font-weight: 600; text-align: center; background: #f9fafb; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+  th.time-col { text-align: left; min-width: 80px; }
+  td { padding: 3px 5px; border-bottom: 1px solid #f9f9f9; text-align: center; }
+  td.time-label { text-align: left; font-size: 12px; color: #4b5563; white-space: nowrap; padding-left: 8px; }
+  .cell { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 30px; border-radius: 5px; font-size: 14px; font-weight: 700; }
+  .c-yes   { background: #dcfce7; color: #16a34a; }
+  .c-maybe { background: #fef3c7; color: #d97706; }
+  .c-no    { background: #fef2f2; color: #ef4444; }
+  .c-na    { background: #f3f4f6; color: #d1d5db; font-size: 11px; }
+  .row-allok td { background: #f0fdf4; }
+  .no-response { font-size: 10px; color: #aaa; display: block; }
   #loading { text-align: center; padding: 60px 20px; color: #888; }
-  .member-tag { display: inline-block; background: #e0e7ff; color: #3730a3; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
-  .no-response { color: #d1d5db; font-size: 11px; }
-  .summary-row td { font-weight: 700; background: #fefce8; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -41,15 +47,20 @@
   <div id="loading">読み込み中...</div>
   <div id="content" style="display:none">
     <div class="header">
-      <h1 id="groupTitle"></h1>
-      <div class="sub" id="memberCount"></div>
-      <button class="refresh-btn" onclick="loadData()">🔄 更新</button>
+      <div class="header-row">
+        <div>
+          <h1 id="groupTitle"></h1>
+          <div class="sub" id="memberCount"></div>
+        </div>
+        <button class="btn-refresh" onclick="loadData()">🔄 更新</button>
+      </div>
       <a id="myFormLink" class="back-link" href="#">← 自分の回答フォームに戻る</a>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #86efac"></div>○ 参加可</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div>✗ 不可</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#f3f4f6;border:1px solid #e5e7eb"></div>未回答</div>
-        <div class="legend-item"><div class="legend-dot" style="background:#bbf7d0;border:1px solid #4ade80"></div>全員○</div>
+        <div class="legend-item"><div class="lc lc-yes">○</div>参加できる</div>
+        <div class="legend-item"><div class="lc lc-maybe">△</div>たぶん大丈夫</div>
+        <div class="legend-item"><div class="lc lc-no">✗</div>参加できない</div>
+        <div class="legend-item"><div class="lc lc-na">—</div>未回答</div>
+        <div class="legend-item"><div class="lc lc-allok">全</div>全員○</div>
       </div>
     </div>
     <div id="tableContainer"></div>
@@ -67,10 +78,8 @@ TIMES.push({ start: '12:30', end: '13:00' });
 for (let h = 15; h < 21; h++) {
   for (let m = 0; m < 60; m += 30) {
     const s = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-    const eh = m === 30 ? h + 1 : h;
-    const em = m === 30 ? 0 : 30;
-    const e = `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}`;
-    TIMES.push({ start: s, end: e });
+    const eh = m === 30 ? h + 1 : h, em = m === 30 ? 0 : 30;
+    TIMES.push({ start: s, end: `${String(eh).padStart(2,'0')}:${String(em).padStart(2,'0')}` });
   }
 }
 
@@ -78,16 +87,19 @@ const params = new URLSearchParams(location.search);
 const CODE = params.get('code');
 const TOKEN = params.get('token');
 
+function normalize(v) {
+  if (v === true || v === 'yes') return 'yes';
+  if (v === 'maybe') return 'maybe';
+  return 'no';
+}
+
 async function loadData() {
   if (!CODE) { document.getElementById('loading').textContent = 'コードが指定されていません'; return; }
-
   const [groupRes, availRes] = await Promise.all([
     fetch(`/api/group/${CODE}`),
     fetch(`/api/group/${CODE}/availability`)
   ]);
-
   if (!groupRes.ok) { document.getElementById('loading').textContent = 'グループが見つかりません'; return; }
-
   const group = await groupRes.json();
   const members = await availRes.json();
 
@@ -95,12 +107,12 @@ async function loadData() {
   document.getElementById('memberCount').textContent = `メンバー ${members.length}人 • コード: ${CODE}`;
   if (TOKEN) document.getElementById('myFormLink').href = `/form.html?token=${TOKEN}&code=${CODE}`;
 
-  renderTable(members);
+  renderTables(members);
   document.getElementById('loading').style.display = 'none';
   document.getElementById('content').style.display = 'block';
 }
 
-function renderTable(members) {
+function renderTables(members) {
   const container = document.getElementById('tableContainer');
   container.innerHTML = '';
 
@@ -108,40 +120,33 @@ function renderTable(members) {
     const card = document.createElement('div');
     card.className = 'card';
 
-    const memberHeaders = members.map(m => {
+    const memberCols = members.map(m => {
       const hasData = Object.keys(m.slots).length > 0;
-      return `<th>${m.name}${hasData ? '' : '<span class="no-response">（未回答）</span>'}</th>`;
+      return `<th>${m.name}${hasData ? '' : '<span class="no-response">未回答</span>'}</th>`;
     }).join('');
 
     const rows = TIMES.map(t => {
       const key = `${date.key}_${t.start}`;
-      const cells = members.map(m => {
-        if (Object.keys(m.slots).length === 0) {
-          return `<td><span class="cell-na">未</span></td>`;
-        }
-        const val = m.slots[key];
-        if (val === true) return `<td><span class="cell-ok">○</span></td>`;
-        return `<td><span class="cell-ng">✗</span></td>`;
-      });
-
-      // Check if all members who answered said OK
       const answered = members.filter(m => Object.keys(m.slots).length > 0);
-      const allOk = answered.length > 0 && answered.every(m => m.slots[key] === true);
+      const allYes = answered.length > 0 && answered.every(m => normalize(m.slots[key]) === 'yes');
 
-      return `<tr${allOk ? ' class="all-ok-row"' : ''}>
-        <td class="time-label">${t.start}〜${t.end}</td>
-        ${cells.join('')}
-      </tr>`;
+      const cells = members.map(m => {
+        const hasData = Object.keys(m.slots).length > 0;
+        if (!hasData) return `<td><span class="cell c-na">—</span></td>`;
+        const state = normalize(m.slots[key]);
+        const cls = state === 'yes' ? 'c-yes' : state === 'maybe' ? 'c-maybe' : 'c-no';
+        const lbl = state === 'yes' ? '○' : state === 'maybe' ? '△' : '✗';
+        return `<td><span class="cell ${cls}">${lbl}</span></td>`;
+      }).join('');
+
+      return `<tr${allYes ? ' class="row-allok"' : ''}><td class="time-label">${t.start}〜${t.end}</td>${cells}</tr>`;
     }).join('');
 
     card.innerHTML = `
       <div class="card-title">${date.label}</div>
       <div class="grid-wrap">
         <table>
-          <thead><tr>
-            <th class="time-col">時間帯</th>
-            ${memberHeaders}
-          </tr></thead>
+          <thead><tr><th class="time-col">時間帯</th>${memberCols}</tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>`;
@@ -149,14 +154,7 @@ function renderTable(members) {
   });
 }
 
-// Apply all-ok highlight
-function applyHighlights() {
-  document.querySelectorAll('.all-ok-row').forEach(row => {
-    row.querySelectorAll('td').forEach(td => td.style.background = '#f0fdf4');
-  });
-}
-
-loadData().then(applyHighlights);
+loadData();
 </script>
 </body>
 </html>
