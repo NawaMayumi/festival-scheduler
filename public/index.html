@@ -171,6 +171,24 @@
     <div class="err" id="soloErr"></div>
   </div>
 
+  <!-- グループ参加（先に表示） -->
+  <div class="panel" id="panel-join">
+    <div class="field">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="margin:0">あなたのグループを選んでください</label>
+        <span onclick="loadGroupList()" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">再読み込み</span>
+      </div>
+      <div id="groupList" class="group-list"></div>
+    </div>
+    <div class="field" id="joinNameField" style="display:none">
+      <label>あなたの名前</label>
+      <input id="joinName" type="text" placeholder="例：鈴木次郎" maxlength="30">
+    </div>
+    <button class="btn" id="joinBtn" onclick="joinGroup()" style="display:none">参加してフォームへ</button>
+    <div class="err" id="joinErr"></div>
+    <span class="join-link" onclick="switchSub('create')">一覧にない場合は新しく作る →</span>
+  </div>
+
   <!-- グループ作成 -->
   <div class="panel" id="panel-create">
     <div class="field">
@@ -183,26 +201,7 @@
     </div>
     <button class="btn" onclick="createGroup()">グループを作ってフォームへ</button>
     <div class="err" id="createErr"></div>
-    <div class="divider">または</div>
-    <button class="btn btn-ghost" onclick="switchSub('join')">既存のグループに参加する</button>
-  </div>
-
-  <!-- グループ参加 -->
-  <div class="panel" id="panel-join">
-    <div class="field">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-        <label style="margin:0">参加するグループを選択</label>
-        <span onclick="loadGroupList()" style="font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">再読み込み</span>
-      </div>
-      <div id="groupList" class="group-list"></div>
-    </div>
-    <div class="field" id="joinNameField" style="display:none">
-      <label>あなたの名前</label>
-      <input id="joinName" type="text" placeholder="例：鈴木次郎" maxlength="30">
-    </div>
-    <button class="btn" id="joinBtn" onclick="joinGroup()" style="display:none">参加してフォームへ</button>
-    <div class="err" id="joinErr"></div>
-    <span class="join-link" onclick="switchSub('create')">← グループを新しく作る</span>
+    <span class="join-link" onclick="switchSub('join')">← グループ一覧に戻る</span>
   </div>
 
   <a href="/admin.html" class="admin-link">管理者ページ →</a>
@@ -215,8 +214,8 @@ function selectType(type) {
   currentType = type;
   ['solo','group'].forEach(t => document.getElementById('card-' + t).classList.toggle('active', t === type));
   ['solo','create','join'].forEach(p => document.getElementById('panel-' + p).classList.remove('show'));
-  document.getElementById(type === 'solo' ? 'panel-solo' : 'panel-create').classList.add('show');
-  if (type === 'group') loadGroupList(); // バックグラウンドで先読み
+  document.getElementById(type === 'solo' ? 'panel-solo' : 'panel-join').classList.add('show');
+  if (type === 'group') loadGroupList();
 }
 
 let selectedGroupCode = null;

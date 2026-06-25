@@ -78,6 +78,9 @@ app.post('/api/register/group', (req, res) => {
   if (!groupName || !memberName) return res.status(400).json({ error: 'グループ名とメンバー名を入力してください' });
 
   const db = readDB();
+  if (db.groups.some(g => g.type === 'group' && g.name === groupName.trim())) {
+    return res.status(400).json({ error: 'そのグループ名はすでに登録されています' });
+  }
   let code;
   do { code = generateCode(); } while (db.groups.some(g => g.code === code));
 
